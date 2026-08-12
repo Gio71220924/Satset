@@ -192,3 +192,28 @@ export function getPath(profile, path) {
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   return String(value);
 }
+
+/**
+ * Pasangan getPath: simpan nilai ke path bertitik. Nilai disimpan apa adanya,
+ * TIDAK dikonversi ke string - checkbox tetap boolean, array tetap array.
+ * Konversi ke teks hanya terjadi saat mengisi form (getPath).
+ *
+ * Wadah yang belum ada dibuatkan: kunci angka jadi array, selain itu objek.
+ * @returns {object} profile yang sama (dimutasi)
+ */
+export function setPath(profile, path, value) {
+  const keys = path.split('.');
+  const last = keys.pop();
+  let node = profile;
+
+  for (const [i, key] of keys.entries()) {
+    if (node[key] == null) {
+      const nextKey = keys[i + 1] ?? last;
+      node[key] = /^\d+$/.test(nextKey) ? [] : {};
+    }
+    node = node[key];
+  }
+
+  node[last] = value;
+  return profile;
+}
