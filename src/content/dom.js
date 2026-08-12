@@ -51,18 +51,30 @@ function labelFor(el) {
   return prev && !prev.querySelector('input, select, textarea') ? prev.textContent : '';
 }
 
+const cleanText = (text) => String(text ?? '').replace(/\s+/g, ' ').trim();
+
 /**
- * Semua petunjuk tentang satu kolom, digabung jadi satu string untuk dicocokkan.
- * Normalisasinya ada di match.js (fungsi murni, ada test-nya).
+ * Petunjuk tentang satu kolom, tetap terpisah per sumber. Sengaja bukan satu
+ * string gabungan: skoring memberi nilai berbeda untuk name/id, label, dan
+ * placeholder, jadi asal-usulnya tidak boleh hilang.
+ *
+ * Bentuk ini yang diterima pickField() di score.js.
  */
-function haystackFor(el) {
-  return [
-    labelFor(el),
-    el.name,
-    el.id,
-    el.placeholder,
-    el.getAttribute('aria-label'),
-  ].filter(Boolean).join(' ');
+function fieldInfoFor(el) {
+  return {
+    label: cleanText(labelFor(el)),
+    name: el.name ?? '',
+    id: el.id ?? '',
+    placeholder: el.placeholder ?? '',
+    ariaLabel: el.getAttribute('aria-label') ?? '',
+  };
+}
+
+/** Nama kolom untuk ditampilkan di popup. Dipotong supaya baris tidak melar. */
+function displayLabel(el) {
+  const info = fieldInfoFor(el);
+  const text = info.label || info.ariaLabel || info.placeholder || info.name || info.id;
+  return cleanText(text).slice(0, 60);
 }
 
 /**
