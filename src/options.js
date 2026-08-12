@@ -277,11 +277,41 @@ function setStatus(text, isError = false) {
   saveState.classList.toggle('warn-text', isError);
 }
 
+/* ---------- izin deteksi di semua situs ---------- */
+
+const ALL_SITES = { origins: ['<all_urls>'] };
+
+/**
+ * Status toggle dibaca dari Chrome, bukan dari profil. Menyimpannya sendiri
+ * berarti ada dua sumber kebenaran yang bisa melenceng - user bisa mencabut
+ * izin lewat chrome://extensions tanpa membuka halaman ini.
+ */
+async function syncAllSitesToggle() {
+  const granted = await chrome.permissions.contains(ALL_SITES);
+  document.getElementById('allSitesToggle').checked = granted;
+}
+
+async function onAllSitesToggle(el) {
+  // request() dan remove() wajib dipanggil dari gestur user - centang checkbox
+  // memenuhi syarat itu. Kalau dialognya ditolak, checkbox dikembalikan.
+  const ok = el.checked
+    ? await chrome.permissions.request(ALL_SITES)
+    : await chrome.permissions.remove(ALL_SITES);
+
+  if (!ok) el.checked = !el.checked;
+  setStatus(el.checked ? 'Deteksi semua situs aktif' : 'Deteksi terbatas portal dikenal');
+}
+
 /* ---------- event ---------- */
 
 function onFieldChange(ev) {
   const el = ev.target;
   if (!state) return;
+
+  if (el.id === 'allSitesToggle') {
+    onAllSitesToggle(el);
+    return;
+  }
 
   // Duluan: input file tidak boleh jatuh ke jalur readValue (nilainya cuma path palsu).
   if (el.id === 'importInput') {
@@ -330,6 +360,7 @@ try {
   const stored = await chrome.storage.local.get(STORAGE_KEY);
   state = migrate(stored[STORAGE_KEY]);
   renderAll();
+  await syncAllSitesToggle();
 
   // change = sudah blur dan nilainya berubah. Persis auto-save saat blur.
   document.addEventListener('change', onFieldChange);
