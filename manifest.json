@@ -1,13 +1,53 @@
 {
   "manifest_version": 3,
   "name": "Satset",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Isi form lamaran kerja otomatis dari satu profil tersimpan di browser.",
+
   "permissions": ["storage"],
+
+  "host_permissions": [
+    "https://jobs.lever.co/*",
+    "https://jobs.eu.lever.co/*"
+  ],
+
+  "background": {
+    "service_worker": "src/sw.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://jobs.lever.co/*",
+        "https://jobs.eu.lever.co/*"
+      ],
+      "js": [
+        "src/content/score.js",
+        "src/content/dom.js",
+        "src/content/match.js",
+        "src/content/fill.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["data/mappings.json", "data/keywords.json"],
+      "matches": [
+        "https://jobs.lever.co/*",
+        "https://jobs.eu.lever.co/*"
+      ]
+    }
+  ],
+
   "options_ui": {
     "page": "src/options.html",
     "open_in_tab": true
   },
+
   "action": {
     "default_popup": "src/popup.html",
     "default_title": "Satset"
