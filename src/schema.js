@@ -178,6 +178,27 @@ function fillDefaults(defaults, stored) {
 }
 
 /**
+ * Baca berkas ekspor dari luar. Ini batas kepercayaan: migrate() dibuat untuk
+ * data milik sendiri di storage, jadi bentuk berkas asing harus dicek DULU.
+ * Tanpa cek ini, JSON sembarang lolos jadi profil kosong dan menimpa data asli
+ * tanpa suara - kegagalan yang paling mahal karena tidak kelihatan.
+ *
+ * @param {string} text isi berkas .json
+ * @returns {{schemaVersion: number, profile: object, settings: object}}
+ * @throws {Error} JSON rusak, bentuk bukan ekspor Satset, atau versi lebih baru
+ */
+export function parseImport(text) {
+  const parsed = JSON.parse(text);
+
+  const isPlainObject = (v) => v != null && typeof v === 'object' && !Array.isArray(v);
+  if (!isPlainObject(parsed) || !isPlainObject(parsed.profile)) {
+    throw new Error('Berkas ini bukan hasil ekspor Satset.');
+  }
+
+  return migrate(parsed);
+}
+
+/**
  * Ambil nilai lewat path bertitik seperti "personal.firstName" atau "work.0.company".
  * Dipakai mapping & heuristik untuk menunjuk field profil tanpa hardcode struktur.
  * @returns {string} string siap isi; "" kalau tidak ada / null / array kosong

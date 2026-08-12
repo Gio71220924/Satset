@@ -1,7 +1,7 @@
 // Editor profil. Binding generik: tiap input membawa data-path, tidak ada
 // kode per field. Kartu berulang, dokumen, dan ekspor/impor menyusul.
 
-import { STORAGE_KEY, migrate, getPath, setPath } from './schema.js';
+import { STORAGE_KEY, migrate, parseImport, getPath, setPath } from './schema.js';
 
 const saveState = document.getElementById('saveState');
 
@@ -98,6 +98,12 @@ function syncCard(card) {
 function onClick(ev) {
   if (!state) return;
 
+  switch (ev.target.id) {
+    case 'exportBtn': return exportProfile();
+    case 'importBtn': return document.getElementById('importInput').click();
+    case 'resetBtn':  return void resetAll();
+  }
+
   const add = ev.target.closest('[data-add]');
   if (add) {
     const name = add.dataset.add;
@@ -184,6 +190,55 @@ async function onDocChange(el) {
   }
 }
 
+/* ---------- ekspor / impor / reset ---------- */
+
+function exportProfile() {
+  const ok = confirm(
+    'Berkas ekspor memuat data pribadi lengkap beserta isi resume, tanpa enkripsi.\n\n' +
+    'Simpan seperti dokumen berisi KTP: jangan taruh di folder yang tersinkron publik.\n\n' +
+    'Lanjutkan?'
+  );
+  if (!ok) return;
+
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `satset-export-${new Date().toISOString().slice(0, 10)}.json`,
+  });
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function onImport(el) {
+  const file = el.files[0];
+  if (!file) return;
+
+  try {
+    // Validasi bentuk + versi ada di parseImport (schema.js), lengkap dengan test.
+    const next = parseImport(await file.text());
+    state = next;                    // baru diganti setelah semua validasi lolos
+    renderAll();
+    await flush();
+    setStatus('Profil diimpor');
+  } catch (err) {
+    setStatus('Impor gagal: ' + err.message, true);
+  } finally {
+    el.value = '';                   // supaya berkas yang sama bisa dipilih lagi
+  }
+}
+
+async function resetAll() {
+  const ok = confirm(
+    'Hapus seluruh profil, dokumen, dan pengaturan dari browser ini?\n\n' +
+    'Tidak bisa dibatalkan. Ekspor dulu kalau masih dibutuhkan.'
+  );
+  if (!ok) return;
+
+  await chrome.storage.local.remove(STORAGE_KEY);
+  location.reload();
+}
+
 /* ---------- form <-> state ---------- */
 
 function writeForm() {
@@ -229,6 +284,10 @@ function onFieldChange(ev) {
   if (!state) return;
 
   // Duluan: input file tidak boleh jatuh ke jalur readValue (nilainya cuma path palsu).
+  if (el.id === 'importInput') {
+    onImport(el);
+    return;
+  }
   if (el.dataset.doc) {
     onDocChange(el);
     return;
@@ -249,16 +308,13 @@ function onFieldChange(ev) {
   }
 }
 
-/** Kontrol yang belum tersambung. Diaktifkan satu per satu di langkah berikutnya. */
-function disableUnwired() {
-  const selectors = ['#exportBtn', '#importBtn', '#importInput', '#resetBtn'];
-  for (const el of document.querySelectorAll(selectors.join(','))) {
-    el.disabled = true;
-    el.title = 'Belum tersedia di versi ini';
-  }
-}
-
 /* ---------- start ---------- */
+
+function renderAll() {
+  writeForm();
+  for (const name of Object.keys(BLANK)) renderList(name);
+  for (const kind of ['resume', 'coverLetter']) renderDoc(kind);
+}
 
 function lockForm(message) {
   for (const el of document.querySelectorAll('input, select, textarea, button')) {
@@ -273,10 +329,7 @@ function lockForm(message) {
 try {
   const stored = await chrome.storage.local.get(STORAGE_KEY);
   state = migrate(stored[STORAGE_KEY]);
-  writeForm();
-  for (const name of Object.keys(BLANK)) renderList(name);
-  for (const kind of ['resume', 'coverLetter']) renderDoc(kind);
-  disableUnwired();
+  renderAll();
 
   // change = sudah blur dan nilainya berubah. Persis auto-save saat blur.
   document.addEventListener('change', onFieldChange);

@@ -4,7 +4,9 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SCHEMA_VERSION, emptyProfile, migrate, getPath, setPath } from './schema.js';
+import {
+  SCHEMA_VERSION, emptyProfile, migrate, parseImport, getPath, setPath,
+} from './schema.js';
 
 test('storage kosong -> profil default yang valid', () => {
   const { schemaVersion, profile, settings } = migrate(undefined);
@@ -66,6 +68,51 @@ test('getPath: array jadi string koma, boolean jadi Yes/No', () => {
   assert.equal(getPath(profile, 'skills'), 'React, SQL');
   assert.equal(getPath(profile, 'preferences.willingToRelocate'), 'Yes');
   assert.equal(getPath(profile, 'preferences.requiresSponsorship'), 'No');
+});
+
+// Impor adalah satu-satunya jalur data dari luar. Tiap kasus di bawah, kalau
+// lolos, akan menimpa profil asli dengan profil kosong tanpa suara.
+test('parseImport: berkas ekspor yang sah diterima utuh', () => {
+  const source = {
+    schemaVersion: SCHEMA_VERSION,
+    profile: {
+      personal: { firstName: 'Ana', email: 'ana@contoh.id' },
+      work: [{ company: 'PT Contoh', startDate: '2023-08', endDate: null }],
+    },
+    settings: { overwriteFilled: true },
+  };
+  const { profile, settings } = parseImport(JSON.stringify(source));
+  assert.equal(profile.personal.firstName, 'Ana');
+  assert.equal(profile.personal.nationality, '');   // key baru ditambal default
+  assert.equal(profile.work[0].startDate, '2023-08');
+  assert.equal(settings.overwriteFilled, true);
+  assert.equal(settings.autoDetect, true);          // setting yang hilang ikut ditambal
+});
+
+test('parseImport: bentuk yang bukan ekspor Satset ditolak, bukan jadi profil kosong', () => {
+  for (const text of [
+    'null',
+    '42',
+    '"ana"',
+    '[]',
+    '[{"profile":{}}]',
+    '{}',                          // tanpa key profile
+    '{"profile":null}',
+    '{"profile":[]}',              // array bukan objek profil
+    '{"profil":{}}',               // salah ketik key
+  ]) {
+    assert.throws(() => parseImport(text), /bukan hasil ekspor Satset/, `harus ditolak: ${text}`);
+  }
+});
+
+test('parseImport: JSON rusak melempar, tidak mengembalikan apa pun', () => {
+  assert.throws(() => parseImport('{ ini bukan json'), SyntaxError);
+  assert.throws(() => parseImport(''), SyntaxError);
+});
+
+test('parseImport: berkas dari versi lebih baru tetap ditolak', () => {
+  const text = JSON.stringify({ schemaVersion: SCHEMA_VERSION + 1, profile: {} });
+  assert.throws(() => parseImport(text), /versi lebih baru/);
 });
 
 test('setPath: tulis nested tanpa menyentuh key tetangga', () => {
