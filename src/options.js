@@ -115,6 +115,72 @@ function onClick(ev) {
     state.profile[name] = readList(name);
     document.getElementById(name + 'Empty').hidden = state.profile[name].length > 0;
     scheduleSave();
+    return;
+  }
+
+  const clear = ev.target.closest('[data-clear-doc]');
+  if (clear) {
+    const kind = clear.dataset.clearDoc;
+    state.profile.documents[kind] = null;
+    document.getElementById(kind + 'Input').value = '';
+    renderDoc(kind);
+    scheduleSave();
+  }
+}
+
+/* ---------- dokumen ---------- */
+
+const MAX_DOC_BYTES = 2 * 1024 * 1024;
+
+function formatSize(bytes) {
+  return bytes < 1024 * 1024
+    ? Math.round(bytes / 1024) + ' KB'
+    : (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function setDocMeta(kind, text, isError = false) {
+  const meta = document.getElementById(kind + 'Meta');
+  meta.textContent = text;
+  meta.classList.toggle('warn-text', isError);
+}
+
+function renderDoc(kind) {
+  const doc = state.profile.documents[kind];
+  setDocMeta(kind, doc ? `${doc.name} · ${formatSize(doc.size)}` : 'Belum ada');
+}
+
+/** base64 lewat FileReader, bukan btoa manual - btoa meledak di berkas besar. */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Berkas tidak bisa dibaca'));
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function onDocChange(el) {
+  const kind = el.dataset.doc;
+  const file = el.files[0];
+  if (!file) return;                       // user membatalkan dialog
+
+  if (file.size > MAX_DOC_BYTES) {
+    el.value = '';                         // dokumen lama sengaja dipertahankan
+    setDocMeta(kind, `Ditolak: ${formatSize(file.size)}, maksimal 2 MB`, true);
+    return;
+  }
+
+  try {
+    state.profile.documents[kind] = {
+      name: file.name,
+      mime: file.type || 'application/octet-stream',
+      size: file.size,
+      data: await fileToBase64(file),
+    };
+    renderDoc(kind);
+    scheduleSave();
+  } catch (err) {
+    setDocMeta(kind, err.message, true);
   }
 }
 
@@ -162,6 +228,12 @@ function onFieldChange(ev) {
   const el = ev.target;
   if (!state) return;
 
+  // Duluan: input file tidak boleh jatuh ke jalur readValue (nilainya cuma path palsu).
+  if (el.dataset.doc) {
+    onDocChange(el);
+    return;
+  }
+
   const card = el.closest('[data-item]');
   if (card) {
     const name = listNameOf(card);
@@ -179,10 +251,7 @@ function onFieldChange(ev) {
 
 /** Kontrol yang belum tersambung. Diaktifkan satu per satu di langkah berikutnya. */
 function disableUnwired() {
-  const selectors = [
-    '[data-clear-doc]', 'input[type="file"]',
-    '#exportBtn', '#importBtn', '#resetBtn',
-  ];
+  const selectors = ['#exportBtn', '#importBtn', '#importInput', '#resetBtn'];
   for (const el of document.querySelectorAll(selectors.join(','))) {
     el.disabled = true;
     el.title = 'Belum tersedia di versi ini';
@@ -206,6 +275,7 @@ try {
   state = migrate(stored[STORAGE_KEY]);
   writeForm();
   for (const name of Object.keys(BLANK)) renderList(name);
+  for (const kind of ['resume', 'coverLetter']) renderDoc(kind);
   disableUnwired();
 
   // change = sudah blur dan nilainya berubah. Persis auto-save saat blur.
