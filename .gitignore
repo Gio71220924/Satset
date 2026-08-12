@@ -1,0 +1,43 @@
+# Data pribadi — JANGAN PERNAH di-commit
+# Profil uji berisi nama, email, no HP, dan isi resume tanpa enkripsi.
+# Lihat docs/test-plan.md section 0 dan PRIVACY.md section 4.
+fixtures/
+*.pdf
+*.docx
+*-profil.json
+satset-export*.json
+
+# Dependency
+node_modules/
+
+# Paket rilis Chrome Web Store
+*.zip
+*.crx
+*.pem
+
+# Build output (belum ada build step, jaga-jaga kalau esbuild masuk nanti)
+dist/
+build/
+
+# Secret
+.env
+.env.*
+!.env.example
+
+# Cache tool
+.impeccable/
+.claude/settings.local.json
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Log
+*.log
+npm-debug.log*
