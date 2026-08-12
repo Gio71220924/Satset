@@ -179,6 +179,24 @@ async function copyReport() {
 
 /* ---------- start ---------- */
 
+/**
+ * Suntik content script ke tab aktif. Berkasnya diambil dari manifest supaya
+ * daftarnya tidak ditulis dua kali.
+ *
+ * Gagal di halaman yang memang tertutup untuk extension (chrome://, Web Store,
+ * berkas PDF). Itu batasan Chrome, bukan bug - tampilkan apa adanya.
+ */
+async function injectHere() {
+  const { js } = chrome.runtime.getManifest().content_scripts[0];
+  try {
+    await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, files: js });
+  } catch (err) {
+    renderMessage('Halaman ini tidak bisa dipindai: ' + err.message, false);
+    return;
+  }
+  await start();
+}
+
 async function start() {
   const scan = await send({
     type: 'scan',
@@ -186,7 +204,16 @@ async function start() {
   });
 
   if (!scan) {
-    renderMessage('Satset belum aktif di halaman ini. Sejauh ini baru mendukung Lever.');
+    // Belum ada content script di sini. Izin activeTab aktif begitu user
+    // mengklik ikon, jadi bisa disuntik saat ini juga - portal mana pun,
+    // tanpa izin permanen apa pun.
+    render([
+      el('p', { className: 'small muted', textContent:
+        'Satset belum memindai halaman ini. Portal ini belum dikenali, '
+        + 'tapi kolom formnya tetap bisa dicocokkan.' }),
+      el('button', { className: 'primary wide', textContent: 'Pindai halaman ini',
+        onclick: injectHere }),
+    ]);
     return;
   }
   if (scan.error) {
