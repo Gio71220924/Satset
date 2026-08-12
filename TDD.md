@@ -252,3 +252,26 @@ Ditulis eksplisit supaya tidak dikira lupa:
 - **Pertanyaan EEO/demografi** (ras, gender, veteran, disabilitas). Tidak diisi otomatis sama sekali. Jawabannya punya konsekuensi berbeda per yurisdiksi dan sering opsional — biar user yang putuskan tiap kali
 - **Pertanyaan spesifik posisi** ("Kenapa tertarik dengan role ini?"). Di luar cakupan autofill
 - **CAPTCHA, rate limiting, anti-bot.** Tidak ada usaha melewatinya
+
+### Honeypot — ditangani, bukan dilewati
+
+Sebagian ATS menanam kolom perangkap bot: tidak terlihat manusia, tapi ada di DOM. Kalau terisi, lamaran ditandai otomatis sebagai robot.
+
+Diverifikasi di form Workday (`tiketdotcom.wd3.myworkdayjobs.com`) lewat DevTools:
+
+```
+name="website"   data-automation-id="beecatcher"
+label            "Enter website. This input is for robots only"
+rect             1x0 px, clip-path: polygon(0 0, 0 0, 0 0, 0 0)
+checkVisibility  true          <- tetap "terlihat" menurut API
+offsetParent     bukan null    <- tetap lolos cek klasik
+```
+
+`name`-nya persis `website`, cocok mutlak dengan pola `links.website` → skor 3 → pasti terisi.
+
+Dua penahan, sengaja tidak saling bergantung:
+
+1. **`isVisible()` di `dom.js`** — tolak kolom dengan lebar/tinggi < 2 px, atau yang seluruhnya di luar layar. Menangani honeypot yang disembunyikan lewat ukuran, `clip-path`, atau `left:-9999px`, tanpa perlu tahu nama kolomnya
+2. **`_neverFill` di `keywords.json`** — tolak berdasarkan teks label (`"for robots only"`, `"leave this field blank"`, `"do not fill"`). Menangani honeypot yang kebetulan berukuran normal
+
+Ini bukan "melewati" anti-bot. Justru sebaliknya: memastikan Satset tidak berperilaku seperti bot yang hendak dideteksi mekanisme itu.
