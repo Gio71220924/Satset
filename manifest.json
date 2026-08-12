@@ -1,15 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Satset",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Isi form lamaran kerja otomatis dari satu profil tersimpan di browser.",
 
-  "permissions": ["storage"],
+  "permissions": ["storage", "activeTab", "scripting"],
 
-  "host_permissions": [
-    "https://jobs.lever.co/*",
-    "https://jobs.eu.lever.co/*"
-  ],
+  "optional_host_permissions": ["<all_urls>"],
 
   "background": {
     "service_worker": "src/sw.js",
@@ -19,8 +16,23 @@
   "content_scripts": [
     {
       "matches": [
-        "https://jobs.lever.co/*",
-        "https://jobs.eu.lever.co/*"
+        "https://*.lever.co/*",
+        "https://*.greenhouse.io/*",
+        "https://*.myworkdayjobs.com/*",
+        "https://*.ashbyhq.com/*",
+        "https://*.smartrecruiters.com/*",
+        "https://*.workable.com/*",
+        "https://*.icims.com/*",
+        "https://*.taleo.net/*",
+        "https://*.bamboohr.com/*",
+        "https://*.recruitee.com/*",
+        "https://*.teamtailor.com/*",
+        "https://*.breezy.hr/*",
+        "https://*.jobvite.com/*",
+        "https://*.rippling.com/*",
+        "https://*.kalibrr.com/*",
+        "https://*.jobstreet.co.id/*",
+        "https://*.glints.com/*"
       ],
       "js": [
         "src/content/score.js",
@@ -30,16 +42,6 @@
       ],
       "run_at": "document_idle",
       "all_frames": true
-    }
-  ],
-
-  "web_accessible_resources": [
-    {
-      "resources": ["data/mappings.json", "data/keywords.json"],
-      "matches": [
-        "https://jobs.lever.co/*",
-        "https://jobs.eu.lever.co/*"
-      ]
     }
   ],
 

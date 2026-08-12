@@ -7,13 +7,16 @@
 
 const MAPPING_SCORE = 9;   // di atas skor heuristik mana pun, cuma untuk pengurutan
 
+/**
+ * Data diminta ke service worker, bukan di-fetch sendiri. Mengambilnya langsung
+ * menuntut web_accessible_resources, dan berkas yang web-accessible bisa
+ * di-probe situs mana pun untuk mendeteksi extension yang terpasang - situs
+ * karier jadi bisa tahu pelamarnya memakai autofill.
+ */
 async function loadMatchData() {
-  const read = (path) => fetch(chrome.runtime.getURL(path)).then((r) => r.json());
-  const [mappings, keywords] = await Promise.all([
-    read('data/mappings.json'),
-    read('data/keywords.json'),
-  ]);
-  return { mappings, keywords };
+  const data = await chrome.runtime.sendMessage({ type: 'getMatchData' });
+  if (!data || data.error) throw new Error(data?.error ?? 'data mapping tidak terbaca');
+  return data;
 }
 
 /** Glob sederhana: hanya `*.` di awal yang didukung, sisanya cocok persis. */
