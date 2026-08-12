@@ -6,8 +6,54 @@
   <title>Satset</title>
   <link rel="stylesheet" href="ui.css">
   <style>
-    body { width: 320px; padding: 14px; }
+    body { width: 360px; padding: 14px; }
     .head { margin-bottom: var(--gap); }
+
+    #body { display: grid; gap: var(--gap); }
+
+    .flist {
+      display: grid;
+      gap: 6px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    /* Tanda, label, nilai. Nilai dipotong supaya popup tidak melebar. */
+    .frow {
+      display: grid;
+      grid-template-columns: 16px 116px minmax(0, 1fr);
+      gap: 8px;
+      align-items: baseline;
+      font-size: 12px;
+    }
+
+    .mark { text-align: center; }
+    .mark.mapping   { color: var(--accent); }
+    .mark.heuristic { color: var(--warn); }
+    .mark.skip      { color: var(--muted); }
+
+    .flabel { color: var(--muted); }
+
+    .fvalue {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .wide { width: 100%; }
+
+    /* Aksi sekunder: tetap terlihat bisa diklik, tapi tidak bersaing
+       dengan satu tombol utama di layar ini. */
+    .linky {
+      justify-self: start;
+      padding: 4px 0;
+      border: 0;
+      background: none;
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+    .linky:hover { color: var(--text); }
   </style>
 </head>
 <body>
