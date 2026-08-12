@@ -78,6 +78,9 @@
     }
 
     .pair { display: flex; gap: var(--gap); flex-wrap: wrap; }
+
+    .subhead { margin: var(--gap-lg) 0 var(--gap); }
+    .mb-lg   { margin-bottom: var(--gap-lg); }
   </style>
 </head>
 <body>
@@ -104,11 +107,6 @@
   </nav>
 
   <main class="stack-lg">
-
-    <p class="notice warn small" id="notConnected">
-      Tampilan saja. Isian di halaman ini belum tersimpan — penyambungan ke
-      penyimpanan dikerjakan di langkah berikutnya.
-    </p>
 
     <!-- ---------- Data Diri ---------- -->
     <section id="personal">
@@ -223,7 +221,7 @@
         <p class="hint">Pisahkan dengan koma.</p>
       </div>
 
-      <div class="row spread" style="margin: var(--gap-lg) 0 var(--gap);">
+      <div class="row spread subhead">
         <strong class="small">Bahasa</strong>
         <button type="button" data-add="languages">+ Tambah</button>
       </div>
@@ -241,6 +239,7 @@
           <span class="small muted" id="resumeMeta">Belum ada</span>
         </div>
         <div class="pair">
+          <label class="sr-only" for="resumeInput">Pilih berkas resume</label>
           <input type="file" id="resumeInput" accept=".pdf,.doc,.docx" data-doc="resume">
           <button type="button" class="danger" data-clear-doc="resume">Hapus</button>
         </div>
@@ -252,6 +251,7 @@
           <span class="small muted" id="coverLetterMeta">Belum ada</span>
         </div>
         <div class="pair">
+          <label class="sr-only" for="coverLetterInput">Pilih berkas surat lamaran</label>
           <input type="file" id="coverLetterInput" accept=".pdf,.doc,.docx" data-doc="coverLetter">
           <button type="button" class="danger" data-clear-doc="coverLetter">Hapus</button>
         </div>
@@ -304,7 +304,7 @@
     <section id="settings">
       <div class="section-head"><h2>Pengaturan</h2></div>
 
-      <div class="stack" style="margin-bottom: var(--gap-lg);">
+      <div class="stack mb-lg">
         <label class="checkbox">
           <input type="checkbox" data-setting="autoDetect">
           Tandai ikon saat form lamaran terdeteksi
@@ -431,6 +431,8 @@
     </div>
   </div>
 </template>
+
+<script type="module" src="options.js"></script>
 
 </body>
 </html>
