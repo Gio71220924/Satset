@@ -152,9 +152,12 @@ Skoring terhadap tiap entri `keywords.json`:
 | Kondisi | Skor |
 |---|---|
 | Pola cocok persis dengan `name` atau `id` | +3 |
+| Pola cocok sebagai kata utuh **di dalam** `name` / `id` (`\bpola\b`) | +2 |
 | Pola cocok sebagai kata utuh di label (`\bpola\b`) | +2 |
 | Pola muncul sebagai substring di placeholder / aria-label | +1 |
 | Pola `negative` muncul di mana pun | −4 |
+
+Tingkat kedua ditambahkan setelah test menunjukkan aturan "persis" saja tidak cukup: ATS jarang memakai atribut yang bersih. Lever menamai kolomnya `urls[LinkedIn]`, Greenhouse memakai `job_application_first_name` — keduanya mengandung kata kuncinya tapi tidak sama dengan kata kuncinya. Tanpa tingkat ini, kolom LinkedIn di Lever tidak pernah ketemu lewat heuristik.
 
 Aturan keputusan:
 
