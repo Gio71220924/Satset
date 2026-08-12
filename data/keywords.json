@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "_readme": "Kamus heuristik, lapis 2. Dipakai kalau domain tidak punya entri di mappings.json, atau field-nya tidak ter-klaim mapping. Skoring: pola cocok name/id = +3, kata utuh di label = +2, substring di placeholder/aria-label = +1, pola negative muncul = -4. Minimum 2 untuk diisi. Detail: TDD.md section 6.3",
+  "_rules": [
+    "Pola ditulis huruf kecil, spasi sebagai pemisah kata. Haystack sudah dinormalisasi (_ - [ ] jadi spasi).",
+    "Pola dua bahasa: Inggris dulu, lalu Indonesia. ATS lokal pakai label Indonesia.",
+    "negative lebih penting daripada patterns. Field salah terisi lebih merugikan daripada field kosong.",
+    "Jangan tambah pola yang terlalu umum ('nama', 'name' sendirian) - biarkan pola yang lebih spesifik menang."
+  ],
+  "entries": [
+    {
+      "path": "personal.firstName",
+      "patterns": ["first name", "firstname", "given name", "nama depan", "fname"],
+      "negative": ["last", "family", "surname", "belakang", "middle", "tengah", "company", "perusahaan", "school", "referensi", "reference"]
+    },
+    {
+      "path": "personal.lastName",
+      "patterns": ["last name", "lastname", "family name", "surname", "nama belakang", "lname"],
+      "negative": ["first", "given", "depan", "middle", "tengah", "company", "perusahaan", "school", "reference"]
+    },
+    {
+      "path": "personal.fullName",
+      "patterns": ["full name", "fullname", "your name", "nama lengkap", "candidate name", "applicant name"],
+      "negative": ["first", "last", "middle", "depan", "belakang", "user name", "username", "company", "perusahaan", "reference", "emergency", "darurat", "file name"]
+    },
+    {
+      "path": "personal.email",
+      "patterns": ["email", "e mail", "email address", "surel", "alamat email"],
+      "negative": ["confirm", "konfirmasi", "reference", "emergency", "darurat", "recruiter", "referral"]
+    },
+    {
+      "path": "personal.phone",
+      "patterns": ["phone", "mobile", "telephone", "hp", "no hp", "nomor telepon", "telepon", "whatsapp", "cell"],
+      "negative": ["emergency", "darurat", "reference", "referensi", "office", "kantor", "work phone", "extension"]
+    },
+    {
+      "path": "personal.dateOfBirth",
+      "patterns": ["date of birth", "birth date", "birthdate", "dob", "tanggal lahir", "tgl lahir"],
+      "negative": ["place", "tempat", "start", "graduation", "available"]
+    },
+    {
+      "path": "personal.addressLine",
+      "patterns": ["address", "street address", "address line", "alamat", "alamat lengkap", "domisili"],
+      "negative": ["email", "city", "kota", "province", "provinsi", "postal", "zip", "kode pos", "country", "negara", "ip address", "web address"]
+    },
+    {
+      "path": "personal.city",
+      "patterns": ["city", "kota", "town", "city of residence", "current location", "lokasi", "domisili kota"],
+      "negative": ["birth", "lahir", "state", "province", "provinsi", "country", "negara", "postal", "kode pos", "university", "school", "company"]
+    },
+    {
+      "path": "personal.province",
+      "patterns": ["province", "provinsi", "state", "region", "state province"],
+      "negative": ["country", "negara", "city", "kota", "statement", "status"]
+    },
+    {
+      "path": "personal.postalCode",
+      "patterns": ["postal code", "postcode", "zip", "zip code", "kode pos"],
+      "negative": ["area code", "country code", "city"]
+    },
+    {
+      "path": "personal.country",
+      "patterns": ["country", "negara", "country of residence"],
+      "negative": ["code", "kode", "citizenship", "nationality", "kewarganegaraan", "city", "county"]
+    },
+    {
+      "path": "personal.nationality",
+      "patterns": ["nationality", "citizenship", "kewarganegaraan", "warga negara"],
+      "negative": ["country of residence", "dual"]
+    },
+    {
+      "path": "links.linkedin",
+      "patterns": ["linkedin", "linked in", "linkedin profile", "linkedin url"],
+      "negative": []
+    },
+    {
+      "path": "links.github",
+      "patterns": ["github", "git hub", "gitlab", "github profile"],
+      "negative": []
+    },
+    {
+      "path": "links.portfolio",
+      "patterns": ["portfolio", "portofolio", "behance", "dribbble", "work samples"],
+      "negative": []
+    },
+    {
+      "path": "links.website",
+      "patterns": ["website", "personal website", "blog", "situs", "other url", "other website"],
+      "negative": ["company website", "website perusahaan", "linkedin", "github", "portfolio"]
+    },
+    {
+      "path": "work.0.company",
+      "patterns": ["current company", "current employer", "company", "employer", "perusahaan", "nama perusahaan", "organization", "most recent company"],
+      "negative": ["website", "size", "industry", "previous", "sebelumnya", "school", "university", "referral"]
+    },
+    {
+      "path": "work.0.title",
+      "patterns": ["current title", "job title", "current position", "posisi saat ini", "jabatan", "current role", "most recent title"],
+      "negative": ["desired", "applying for", "position applied", "posisi dilamar", "mr", "mrs", "salutation"]
+    },
+    {
+      "path": "education.0.school",
+      "patterns": ["school", "university", "college", "institution", "universitas", "sekolah", "perguruan tinggi", "almamater"],
+      "negative": ["high school", "sma", "smk", "company", "perusahaan", "major", "jurusan", "degree"]
+    },
+    {
+      "path": "education.0.degree",
+      "patterns": ["degree", "education level", "jenjang", "tingkat pendidikan", "qualification"],
+      "negative": ["field", "major", "jurusan", "school", "university"]
+    },
+    {
+      "path": "education.0.fieldOfStudy",
+      "patterns": ["field of study", "major", "jurusan", "program studi", "prodi", "discipline", "course of study"],
+      "negative": ["degree", "school", "university", "level"]
+    },
+    {
+      "path": "education.0.gpa",
+      "patterns": ["gpa", "grade point", "ipk", "cumulative gpa", "nilai akhir"],
+      "negative": ["scale", "skala", "max"]
+    },
+    {
+      "path": "skills",
+      "patterns": ["skills", "key skills", "keahlian", "kemampuan", "technical skills"],
+      "negative": ["soft skill assessment", "rate your"]
+    },
+    {
+      "path": "preferences.desiredSalary",
+      "patterns": ["expected salary", "salary expectation", "desired salary", "gaji yang diharapkan", "ekspektasi gaji", "expected compensation"],
+      "negative": ["current salary", "gaji saat ini", "previous salary"]
+    },
+    {
+      "path": "preferences.noticePeriod",
+      "patterns": ["notice period", "notice", "masa pemberitahuan", "how soon can you start", "kapan bisa mulai"],
+      "negative": []
+    },
+    {
+      "path": "preferences.availableFrom",
+      "patterns": ["available from", "start date", "earliest start", "tanggal mulai", "availability date"],
+      "negative": ["end date", "birth", "graduation", "employment start"]
+    },
+    {
+      "path": "preferences.requiresSponsorship",
+      "patterns": ["require sponsorship", "need sponsorship", "visa sponsorship", "butuh sponsor"],
+      "negative": ["do not require", "authorized to work"]
+    },
+    {
+      "path": "preferences.willingToRelocate",
+      "patterns": ["willing to relocate", "open to relocation", "bersedia relokasi", "bersedia ditempatkan"],
+      "negative": ["travel", "perjalanan dinas"]
+    },
+    {
+      "path": "documents.resume",
+      "patterns": ["resume", "cv", "curriculum vitae", "upload resume", "unggah cv", "attach resume"],
+      "negative": ["cover letter", "surat lamaran", "portfolio", "transcript", "transkrip", "certificate", "sertifikat", "photo", "foto", "ktp", "id card"]
+    },
+    {
+      "path": "documents.coverLetter",
+      "patterns": ["cover letter", "covering letter", "surat lamaran", "motivation letter"],
+      "negative": ["resume", "cv", "transcript"]
+    }
+  ],
+  "_neverFill": {
+    "_readme": "Bukan bagian skoring. Field yang cocok ke sini dilewati tanpa syarat, walau skornya tinggi. Lihat TDD.md section 12.",
+    "patterns": [
+      "password", "kata sandi", "confirm password",
+      "captcha", "verification code", "kode verifikasi", "otp",
+      "race", "ethnicity", "gender", "veteran", "disability", "hispanic",
+      "suku", "agama", "religion",
+      "credit card", "cvv", "nomor rekening", "account number",
+      "ssn", "social security", "nik", "npwp", "passport number"
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "_readme": "Selector per ATS. Lapis 1 pencocokan field. Cara pakai + cara nambah platform: docs/field-mapping.md. SEMUA entri di sini status 'unverified' sampai diuji ke halaman lowongan live (Milestone 2 di docs/roadmap.md). Selector ditulis dari struktur form yang umum dipakai, bukan hasil inspect halaman nyata.",
+  "_fieldStatus": {
+    "verified": "diuji ke minimal 2 halaman lowongan berbeda, tanggal uji dicatat di docs/field-mapping.md",
+    "unverified": "belum diuji, boleh salah, tidak boleh dianggap benar",
+    "broken": "pernah verified, sekarang gagal. Jangan dihapus - catat supaya tahu ATS-nya berubah"
+  },
+  "platforms": [
+    {
+      "id": "greenhouse",
+      "label": "Greenhouse",
+      "match": ["boards.greenhouse.io", "job-boards.greenhouse.io", "*.greenhouse.io"],
+      "note": "Dua generasi form hidup bersamaan: boards.* (lama, pakai id) dan job-boards.* (baru, pakai name). Selector digabung pakai koma - querySelector ambil yang pertama ketemu, jadi satu entri menutup keduanya.",
+      "fields": [
+        { "selector": "#first_name, input[name='first_name']", "path": "personal.firstName", "status": "unverified" },
+        { "selector": "#last_name, input[name='last_name']", "path": "personal.lastName", "status": "unverified" },
+        { "selector": "#email, input[name='email']", "path": "personal.email", "status": "unverified" },
+        { "selector": "#phone, input[name='phone']", "path": "personal.phone", "status": "unverified" },
+        { "selector": "#resume, input[type='file'][name*='resume']", "path": "documents.resume", "status": "unverified", "note": "Greenhouse upload ke S3 lewat widget sendiri. Kalau set .files tidak memicu upload, fallback ke instruksi manual - jangan paksa." },
+        { "selector": "#cover_letter, input[type='file'][name*='cover']", "path": "documents.coverLetter", "status": "unverified" },
+        { "selector": "input[autocomplete='address-level2']", "path": "personal.city", "status": "unverified" },
+        { "selector": "input[name*='urls'][name*='LinkedIn'], #job_application_answers_attributes_0_text_value", "path": "links.linkedin", "status": "unverified", "note": "Link di Greenhouse hampir selalu custom question, bukan field baku. Indeks answers_attributes berubah per lowongan - andalkan heuristik label, bukan selector ini." }
+      ]
+    },
+    {
+      "id": "lever",
+      "label": "Lever",
+      "match": ["jobs.lever.co", "jobs.eu.lever.co"],
+      "note": "Form paling stabil dari ketiganya: berbasis atribut name, hampir tidak berubah bertahun-tahun. Nama disimpan sebagai satu field, bukan first/last.",
+      "fields": [
+        { "selector": "input[name='name']", "path": "personal.fullName", "status": "unverified", "note": "Satu field nama lengkap. Kalau fullName kosong, jangan sambung firstName+lastName di sini - perbaiki di options page." },
+        { "selector": "input[name='email']", "path": "personal.email", "status": "unverified" },
+        { "selector": "input[name='phone']", "path": "personal.phone", "status": "unverified" },
+        { "selector": "input[name='org']", "path": "work.0.company", "status": "unverified", "note": "Label 'Current company'. Ambil pekerjaan terbaru, indeks 0." },
+        { "selector": "input[name='location']", "path": "personal.city", "status": "unverified", "note": "Sering autocomplete Google Places. Isi teks saja lalu dispatch input - jangan coba pilih dari dropdown." },
+        { "selector": "input[name='urls[LinkedIn]']", "path": "links.linkedin", "status": "unverified" },
+        { "selector": "input[name='urls[GitHub]']", "path": "links.github", "status": "unverified" },
+        { "selector": "input[name='urls[Portfolio]']", "path": "links.portfolio", "status": "unverified" },
+        { "selector": "input[name='urls[Other]']", "path": "links.website", "status": "unverified" },
+        { "selector": "input[type='file'][name='resume']", "path": "documents.resume", "status": "unverified" }
+      ]
+    }
+  ],
+  "_backlog": {
+    "linkedin-easy-apply": "Fase 2. Modal multi-step, class ter-obfuscate, DOM berubah tiap langkah. Butuh pendekatan beda (observer per langkah), bukan sekadar tambah entri di file ini.",
+    "workday": "Fase 2. Selector pakai data-automation-id yang justru stabil, tapi form-nya multi-halaman dengan sesi login.",
+    "kalibrr": "Fase 2, prioritas lokal.",
+    "jobstreet": "Fase 2, prioritas lokal.",
+    "glints": "Fase 3."
+  }
+}
