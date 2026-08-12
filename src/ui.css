@@ -1,0 +1,174 @@
+/* Satset — token + komponen dasar, dipakai popup dan options page.
+   Aturan tampilan: rules.md bagian UI/UX. */
+
+:root {
+  /* Tanpa hitam/putih murni, saturasi ditahan rendah. */
+  --bg:        #f6f6f3;
+  --surface:   #fdfdfb;
+  --text:      #1f2020;
+  --muted:     #6a6b67;
+  --border:    #dcdcd4;
+  --accent:    #2f6f4e;
+  --accent-fg: #fdfdfb;
+  --soft:      #e9f0eb;
+  --warn:      #8a6d1f;
+  --warn-soft: #f5efdc;
+  --danger:    #8f3b34;
+
+  --gap:    12px;   /* jarak antar field dalam satu grup */
+  --gap-lg: 24px;   /* jarak antar grup */
+  --radius: 10px;
+  --radius-inner: 7px;  /* elemen di dalam kartu selalu lebih kecil dari wadahnya */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #191a18;
+    --surface:   #212220;
+    --text:      #e4e4de;
+    --muted:     #97988f;
+    --border:    #34352e;
+    --accent:    #7cab8c;   /* diturunkan saturasinya untuk mode gelap */
+    --accent-fg: #16211a;
+    --soft:      #26302a;
+    --warn:      #c9a84e;
+    --warn-soft: #2e2a1d;
+    --danger:    #c47b73;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+h1 { font-size: 18px; margin: 0; }
+h2 { font-size: 15px; margin: 0 0 var(--gap); }
+
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+/* ---------- Form ---------- */
+
+/* Label selalu terpisah dari field. Placeholder tidak pernah jadi label. */
+.field {
+  display: grid;
+  grid-template-columns: 150px 1fr;   /* label sejajar horizontal */
+  align-items: center;
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+
+.field > label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field .hint {
+  grid-column: 2;
+  margin-top: -4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 620px) {
+  .field { grid-template-columns: 1fr; align-items: start; gap: 4px; }
+  .field .hint { grid-column: 1; }
+}
+
+/* Kotak, bukan garis bawah. */
+input[type="text"], input[type="email"], input[type="tel"], input[type="url"],
+input[type="date"], input[type="month"], select, textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-inner);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+textarea { min-height: 76px; resize: vertical; }
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+/* Field tanggal tidak perlu selebar field teks. */
+input[type="month"], input[type="date"] { max-width: 190px; }
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* ---------- Tombol ---------- */
+
+button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-inner);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;           /* elemen bisa diklik harus terlihat bisa diklik */
+}
+
+button:hover  { border-color: var(--accent); }
+button:active { transform: translateY(1px); }
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 600;
+}
+
+button.danger { color: var(--danger); border-color: var(--danger); }
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Kartu ---------- */
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--gap);
+  margin-bottom: var(--gap);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.row.spread { justify-content: space-between; }
+
+.stack    { display: grid; gap: var(--gap); }
+.stack-lg { display: grid; gap: var(--gap-lg); }
+
+/* ---------- Notice ---------- */
+
+.notice {
+  padding: 10px var(--gap);
+  border-radius: var(--radius-inner);
+  background: var(--soft);
+  font-size: 13px;
+}
+
+.notice.warn { background: var(--warn-soft); color: var(--warn); }
