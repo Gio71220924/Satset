@@ -2,18 +2,435 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Satset — Profil</title>
   <link rel="stylesheet" href="ui.css">
   <style>
-    .wrap { max-width: 820px; margin: 0 auto; padding: 32px 20px; }
+    html { scroll-behavior: smooth; }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: var(--gap-lg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* Navigasi cukup anchor biasa. Tidak butuh JS. */
+    .nav {
+      position: sticky;
+      top: 76px;
+      align-self: start;
+      display: grid;
+      gap: 2px;
+      font-size: 13px;
+    }
+
+    .nav a {
+      padding: 6px 10px;
+      border-radius: var(--radius-inner);
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .nav a:hover { background: var(--soft); color: var(--text); }
+    .nav hr { border: 0; border-top: 1px solid var(--border); margin: 8px 10px; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--gap-lg);
+    }
+
+    .topbar .inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 20px;
+    }
+
+    section { scroll-margin-top: 92px; }
+
+    .section-head {
+      margin-bottom: var(--gap);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-head {
+      margin: calc(var(--gap) * -1) calc(var(--gap) * -1) var(--gap);
+      padding: 10px var(--gap);
+      border-bottom: 1px solid var(--border);
+      background: var(--soft);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .empty {
+      padding: 20px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .pair { display: flex; gap: var(--gap); flex-wrap: wrap; }
   </style>
 </head>
 <body>
-  <main class="wrap stack-lg">
-    <h1>Profil</h1>
-    <p class="notice warn small">
-      Editor profil belum ada. Sedang dikerjakan di M1 langkah 3.
+
+<header class="topbar">
+  <div class="inner row spread">
+    <h1>Satset — Profil</h1>
+    <span class="small muted" id="saveState">Belum tersambung</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <nav class="nav">
+    <a href="#personal">Data Diri</a>
+    <a href="#links">Tautan</a>
+    <a href="#work">Pengalaman</a>
+    <a href="#education">Pendidikan</a>
+    <a href="#skills">Skill &amp; Bahasa</a>
+    <a href="#documents">Dokumen</a>
+    <a href="#preferences">Preferensi</a>
+    <hr>
+    <a href="#settings">Pengaturan</a>
+  </nav>
+
+  <main class="stack-lg">
+
+    <p class="notice warn small" id="notConnected">
+      Tampilan saja. Isian di halaman ini belum tersimpan — penyambungan ke
+      penyimpanan dikerjakan di langkah berikutnya.
     </p>
+
+    <!-- ---------- Data Diri ---------- -->
+    <section id="personal">
+      <div class="section-head"><h2>Data Diri</h2></div>
+
+      <div class="field">
+        <label for="firstName">Nama depan</label>
+        <input id="firstName" type="text" data-path="personal.firstName" autocomplete="given-name">
+      </div>
+      <div class="field">
+        <label for="lastName">Nama belakang</label>
+        <input id="lastName" type="text" data-path="personal.lastName" autocomplete="family-name">
+      </div>
+      <div class="field">
+        <label for="fullName">Nama lengkap</label>
+        <input id="fullName" type="text" data-path="personal.fullName" autocomplete="name">
+        <p class="hint">Sebagian form (mis. Lever) hanya menyediakan satu kolom nama.</p>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" data-path="personal.email" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="phone">No. HP</label>
+        <input id="phone" type="tel" data-path="personal.phone" placeholder="+6281234567890">
+        <p class="hint">Awali dengan kode negara, mis. +62. Sebagian ATS menolak format lokal.</p>
+      </div>
+      <div class="field">
+        <label for="dateOfBirth">Tanggal lahir</label>
+        <input id="dateOfBirth" type="date" data-path="personal.dateOfBirth">
+      </div>
+      <div class="field">
+        <label for="addressLine">Alamat</label>
+        <input id="addressLine" type="text" data-path="personal.addressLine">
+      </div>
+      <div class="field">
+        <label for="city">Kota</label>
+        <input id="city" type="text" data-path="personal.city">
+      </div>
+      <div class="field">
+        <label for="province">Provinsi</label>
+        <input id="province" type="text" data-path="personal.province">
+      </div>
+      <div class="field">
+        <label for="postalCode">Kode pos</label>
+        <input id="postalCode" type="text" data-path="personal.postalCode" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label for="country">Negara</label>
+        <input id="country" type="text" data-path="personal.country" placeholder="Indonesia">
+      </div>
+      <div class="field">
+        <label for="nationality">Kewarganegaraan</label>
+        <input id="nationality" type="text" data-path="personal.nationality" placeholder="Indonesian">
+      </div>
+    </section>
+
+    <!-- ---------- Tautan ---------- -->
+    <section id="links">
+      <div class="section-head"><h2>Tautan</h2></div>
+
+      <div class="field">
+        <label for="linkedin">LinkedIn</label>
+        <input id="linkedin" type="url" data-path="links.linkedin" placeholder="https://linkedin.com/in/...">
+      </div>
+      <div class="field">
+        <label for="github">GitHub</label>
+        <input id="github" type="url" data-path="links.github" placeholder="https://github.com/...">
+      </div>
+      <div class="field">
+        <label for="portfolio">Portofolio</label>
+        <input id="portfolio" type="url" data-path="links.portfolio">
+      </div>
+      <div class="field">
+        <label for="website">Website</label>
+        <input id="website" type="url" data-path="links.website">
+      </div>
+      <p class="hint">Tulis lengkap dengan <code>https://</code> — banyak ATS memvalidasi format URL.</p>
+    </section>
+
+    <!-- ---------- Pengalaman ---------- -->
+    <section id="work">
+      <div class="section-head row spread">
+        <h2>Pengalaman Kerja</h2>
+        <button type="button" data-add="work">+ Tambah</button>
+      </div>
+
+      <div id="workList"></div>
+      <p class="empty" id="workEmpty">Belum ada pengalaman kerja.</p>
+      <p class="hint">Kartu paling atas dipakai untuk kolom "Current company" dan "Current title".</p>
+    </section>
+
+    <!-- ---------- Pendidikan ---------- -->
+    <section id="education">
+      <div class="section-head row spread">
+        <h2>Pendidikan</h2>
+        <button type="button" data-add="education">+ Tambah</button>
+      </div>
+
+      <div id="educationList"></div>
+      <p class="empty" id="educationEmpty">Belum ada riwayat pendidikan.</p>
+    </section>
+
+    <!-- ---------- Skill & Bahasa ---------- -->
+    <section id="skills">
+      <div class="section-head"><h2>Skill &amp; Bahasa</h2></div>
+
+      <div class="field">
+        <label for="skillList">Skill</label>
+        <textarea id="skillList" data-path="skills" data-type="csv"
+                  placeholder="Python, SQL, React"></textarea>
+        <p class="hint">Pisahkan dengan koma.</p>
+      </div>
+
+      <div class="row spread" style="margin: var(--gap-lg) 0 var(--gap);">
+        <strong class="small">Bahasa</strong>
+        <button type="button" data-add="languages">+ Tambah</button>
+      </div>
+      <div id="languagesList"></div>
+      <p class="empty" id="languagesEmpty">Belum ada bahasa.</p>
+    </section>
+
+    <!-- ---------- Dokumen ---------- -->
+    <section id="documents">
+      <div class="section-head"><h2>Dokumen</h2></div>
+
+      <div class="card">
+        <div class="card-head row spread">
+          <strong class="small">Resume / CV</strong>
+          <span class="small muted" id="resumeMeta">Belum ada</span>
+        </div>
+        <div class="pair">
+          <input type="file" id="resumeInput" accept=".pdf,.doc,.docx" data-doc="resume">
+          <button type="button" class="danger" data-clear-doc="resume">Hapus</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head row spread">
+          <strong class="small">Surat Lamaran</strong>
+          <span class="small muted" id="coverLetterMeta">Belum ada</span>
+        </div>
+        <div class="pair">
+          <input type="file" id="coverLetterInput" accept=".pdf,.doc,.docx" data-doc="coverLetter">
+          <button type="button" class="danger" data-clear-doc="coverLetter">Hapus</button>
+        </div>
+      </div>
+
+      <p class="notice small">
+        Berkas disimpan di browser ini saja, maksimal 2 MB, tanpa enkripsi tambahan.
+      </p>
+    </section>
+
+    <!-- ---------- Preferensi ---------- -->
+    <section id="preferences">
+      <div class="section-head"><h2>Preferensi</h2></div>
+
+      <div class="field">
+        <label for="desiredSalary">Ekspektasi gaji</label>
+        <input id="desiredSalary" type="text" data-path="preferences.desiredSalary"
+               placeholder="Rp 12.000.000/bulan">
+      </div>
+      <div class="field">
+        <label for="noticePeriod">Notice period</label>
+        <input id="noticePeriod" type="text" data-path="preferences.noticePeriod"
+               placeholder="1 bulan">
+      </div>
+      <div class="field">
+        <label for="availableFrom">Bisa mulai</label>
+        <input id="availableFrom" type="date" data-path="preferences.availableFrom">
+      </div>
+      <div class="field">
+        <label for="workAuthorization">Izin kerja</label>
+        <input id="workAuthorization" type="text" data-path="preferences.workAuthorization"
+               placeholder="WNI">
+      </div>
+      <div class="field">
+        <label>Lainnya</label>
+        <div class="stack">
+          <label class="checkbox">
+            <input type="checkbox" data-path="preferences.willingToRelocate">
+            Bersedia relokasi
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" data-path="preferences.requiresSponsorship">
+            Butuh sponsor visa
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- Pengaturan ---------- -->
+    <section id="settings">
+      <div class="section-head"><h2>Pengaturan</h2></div>
+
+      <div class="stack" style="margin-bottom: var(--gap-lg);">
+        <label class="checkbox">
+          <input type="checkbox" data-setting="autoDetect">
+          Tandai ikon saat form lamaran terdeteksi
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" data-setting="overwriteFilled">
+          Timpa kolom yang sudah ada isinya
+        </label>
+        <p class="hint">
+          Biarkan mati kalau ragu. Sebagian ATS mengisi sendiri email dari akun yang login.
+        </p>
+      </div>
+
+      <div class="section-head"><strong class="small">Data</strong></div>
+      <div class="pair">
+        <button type="button" id="exportBtn">Ekspor profil</button>
+        <button type="button" id="importBtn">Impor profil</button>
+        <input type="file" id="importInput" accept=".json" hidden>
+        <button type="button" class="danger" id="resetBtn">Hapus semua data</button>
+      </div>
+      <p class="hint">
+        Berkas ekspor memuat data pribadi lengkap beserta isi resume, tanpa enkripsi.
+      </p>
+    </section>
+
   </main>
+</div>
+
+<!-- ---------- Template kartu berulang ---------- -->
+
+<template id="tpl-work">
+  <div class="card" data-item>
+    <div class="card-head row spread">
+      <strong class="small" data-title>Pengalaman baru</strong>
+      <button type="button" class="danger" data-remove>Hapus</button>
+    </div>
+    <div class="field">
+      <label>Perusahaan</label>
+      <input type="text" data-field="company">
+    </div>
+    <div class="field">
+      <label>Posisi</label>
+      <input type="text" data-field="title">
+    </div>
+    <div class="field">
+      <label>Lokasi</label>
+      <input type="text" data-field="location">
+    </div>
+    <div class="field">
+      <label>Periode</label>
+      <div class="pair">
+        <input type="month" data-field="startDate" aria-label="Mulai">
+        <input type="month" data-field="endDate" aria-label="Selesai">
+      </div>
+    </div>
+    <div class="field">
+      <label></label>
+      <label class="checkbox">
+        <input type="checkbox" data-field="current">
+        Masih bekerja di sini
+      </label>
+    </div>
+    <div class="field">
+      <label>Deskripsi</label>
+      <textarea data-field="description"></textarea>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-education">
+  <div class="card" data-item>
+    <div class="card-head row spread">
+      <strong class="small" data-title>Pendidikan baru</strong>
+      <button type="button" class="danger" data-remove>Hapus</button>
+    </div>
+    <div class="field">
+      <label>Institusi</label>
+      <input type="text" data-field="school">
+    </div>
+    <div class="field">
+      <label>Jenjang</label>
+      <input type="text" data-field="degree" placeholder="S1">
+    </div>
+    <div class="field">
+      <label>Jurusan</label>
+      <input type="text" data-field="fieldOfStudy">
+    </div>
+    <div class="field">
+      <label>Lokasi</label>
+      <input type="text" data-field="location">
+    </div>
+    <div class="field">
+      <label>Periode</label>
+      <div class="pair">
+        <input type="month" data-field="startDate" aria-label="Mulai">
+        <input type="month" data-field="endDate" aria-label="Selesai">
+      </div>
+    </div>
+    <div class="field">
+      <label>IPK</label>
+      <input type="text" data-field="gpa" placeholder="3.45" inputmode="decimal">
+    </div>
+  </div>
+</template>
+
+<template id="tpl-languages">
+  <div class="card" data-item>
+    <div class="card-head row spread">
+      <strong class="small" data-title>Bahasa baru</strong>
+      <button type="button" class="danger" data-remove>Hapus</button>
+    </div>
+    <div class="field">
+      <label>Bahasa</label>
+      <input type="text" data-field="name" placeholder="English">
+    </div>
+    <div class="field">
+      <label>Kemampuan</label>
+      <select data-field="proficiency">
+        <option value="native">Native</option>
+        <option value="fluent">Fluent</option>
+        <option value="professional">Professional</option>
+        <option value="basic">Basic</option>
+      </select>
+    </div>
+  </div>
+</template>
+
 </body>
 </html>
