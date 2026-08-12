@@ -10,6 +10,17 @@ const SKIP_TYPES = new Set([
 ]);
 
 function isVisible(el) {
+  const rect = el.getBoundingClientRect();
+
+  // Kolom perangkap bot (honeypot). Diverifikasi di form Workday asli:
+  //   name="website"  label="Enter website. This input is for robots only"
+  //   rect 1x0 px, clip-path: polygon(0 0, 0 0, 0 0, 0 0)
+  // checkVisibility() mengembalikan TRUE untuk kolom itu dan offsetParent-nya
+  // tidak null, jadi dua pemeriksaan di bawah tidak cukup sendirian. Mengisinya
+  // menandai lamaran sebagai robot - kegagalan yang tidak terlihat sama sekali.
+  if (rect.width < 2 || rect.height < 2) return false;
+  if (rect.right < 0 || rect.bottom < 0) return false;   // digeser ke luar layar
+
   // checkVisibility() menangani content-visibility dan visibility:hidden;
   // offsetParent untuk Chrome lama dan elemen di dalam wadah position:fixed.
   return typeof el.checkVisibility === 'function'

@@ -161,7 +161,11 @@
   ],
   "_neverFill": {
     "_readme": "Bukan bagian skoring. Field yang cocok ke sini dilewati tanpa syarat, walau skornya tinggi. Lihat TDD.md section 12.",
+    "_honeypotNote": "Kolom perangkap bot. Lapis pertama ada di dom.js (tolak kolom berukuran nol / di luar layar), ini lapis kedua lewat teks labelnya. Ditemukan di form Workday asli: name='website' label='Enter website. This input is for robots only' - name-nya cocok mutlak dengan links.website, jadi tanpa penahan ini kolomnya pasti terisi dan lamaran ditandai robot.",
     "patterns": [
+      "for robots only", "robots only", "this field is for robots",
+      "leave this field blank", "leave blank", "do not fill", "jangan diisi",
+      "honeypot", "beecatcher",
       "password", "kata sandi", "confirm password",
       "captcha", "verification code", "kode verifikasi", "otp",
       "race", "ethnicity", "gender", "veteran", "disability", "hispanic",

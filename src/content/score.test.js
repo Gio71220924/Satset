@@ -82,6 +82,25 @@ test('daftar terlarang dilewati berapa pun skornya', () => {
   assert.equal(pathOf({ label: 'Email', name: 'verification_code' }), null);
 });
 
+// Kolom asli dari form Workday tiket.com, diperiksa lewat DevTools:
+//   name="website"  data-automation-id="beecatcher"
+//   label="Enter website. This input is for robots only,"
+// name-nya cocok MUTLAK dengan pola links.website (skor 3). Tanpa penahan
+// _neverFill, kolom ini pasti terisi dan lamaran ditandai robot.
+test('honeypot anti-bot tidak diisi walau name-nya cocok mutlak', () => {
+  assert.equal(pathOf({
+    name: 'website',
+    label: 'Enter website. This input is for robots only,',
+  }), null);
+
+  // Varian honeypot yang lazim di form lain
+  assert.equal(pathOf({ name: 'website', label: 'Leave this field blank' }), null);
+  assert.equal(pathOf({ name: 'email', label: 'Do not fill this in' }), null);
+
+  // Kolom website yang sah tetap ketemu - penahannya tidak kebablasan
+  assert.equal(pathOf({ label: 'Personal Website', name: 'website' }), 'links.website');
+});
+
 test('tiap path di kamus mengarah ke section yang ada di skema', async () => {
   const { emptyProfile } = await import('../schema.js');
   const profile = emptyProfile();
