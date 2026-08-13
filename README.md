@@ -1,6 +1,6 @@
-# Satset
+<h1><img src="assets/logo.png" alt="Satset — Sistem Auto Tempel Sat-set Emang Top" width="420"></h1>
 
-**Sistem Auto Tempel Sat-set Emang Top** — Chrome extension untuk mengisi form lamaran kerja otomatis dari satu profil tersimpan.
+Chrome extension untuk mengisi form lamaran kerja otomatis dari satu profil tersimpan.
 
 > Status: **v0.3.0, dalam pengembangan.** Sudah bisa dipakai lewat *load unpacked*, belum ada di Chrome Web Store.
 
