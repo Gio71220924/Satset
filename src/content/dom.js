@@ -78,6 +78,10 @@ function fieldInfoFor(el) {
     id: el.id ?? '',
     placeholder: el.placeholder ?? '',
     ariaLabel: el.getAttribute('aria-label') ?? '',
+    // Dua ini tidak ikut diskor - dipakai adaptDateValue() untuk tahu
+    // granularitas tanggal yang diminta kolom (YYYY, MM/YYYY, atau penuh).
+    type: el.type ?? '',
+    maxLength: el.maxLength > 0 ? el.maxLength : 0,
   };
 }
 

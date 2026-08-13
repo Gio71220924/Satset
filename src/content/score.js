@@ -64,6 +64,36 @@ function scoreField(field, entry) {
 }
 
 /**
+ * Sesuaikan bentuk tanggal dengan yang diminta kolom.
+ *
+ * Profil menyimpan "YYYY-MM" (docs/profile-schema.md bagian 3), tapi ATS minta
+ * granularitas yang berbeda-beda: Workday minta "YYYY" saja dengan kotak 4
+ * digit, sebagian minta "MM/YYYY", sebagian pakai input[type=month].
+ * Mengirim "2018-08" ke kolom yang cuma muat 4 digit sama saja dengan gagal.
+ *
+ * Nilai yang bukan "YYYY-MM" diteruskan apa adanya.
+ */
+function adaptDateValue(field, value) {
+  const parts = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!parts) return value;
+  const [, year, month] = parts;
+
+  if (field.type === 'month') return value;
+  if (field.type === 'date') return `${value}-01`;   // hari tidak disimpan, ambil tanggal 1
+
+  const hint = [field.placeholder, field.ariaLabel, field.label]
+    .join(' ').toLowerCase();
+
+  // Urutan penting: pola gabungan diperiksa sebelum "yyyy" sendirian.
+  if (/mm\s*[/-]\s*yyyy/.test(hint)) return `${month}/${year}`;
+  if (/yyyy\s*[/-]\s*mm/.test(hint)) return `${year}-${month}`;
+  if (Number(field.maxLength) === 4) return year;
+  if (/\byyyy\b/.test(hint)) return year;
+
+  return value;
+}
+
+/**
  * Pilih path profil untuk satu kolom, atau null kalau tidak yakin.
  *
  * Tidak yakin lebih baik daripada salah: kolom kosong bisa diisi user dalam

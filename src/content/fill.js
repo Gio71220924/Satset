@@ -58,8 +58,11 @@ function fillOne(field, payload) {
     return 'filled';
   }
 
-  const value = payload.values?.[path] ?? '';
-  if (!value) return 'skipped';               // kosong di profil, jangan tulis ""
+  const raw = payload.values?.[path] ?? '';
+  if (!raw) return 'skipped';                 // kosong di profil, jangan tulis ""
+
+  // "2018-08" jadi "2018" kalau kolomnya cuma minta tahun.
+  const value = adaptDateValue(fieldInfoFor(el), raw);
 
   if (!previous.has(el)) previous.set(el, el.value);
 

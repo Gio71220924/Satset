@@ -14,7 +14,7 @@ import vm from 'node:vm';
 
 const sandbox = vm.createContext({});
 vm.runInContext(fs.readFileSync(new URL('./score.js', import.meta.url), 'utf8'), sandbox);
-const { pickField, scoreField, normalizeText } = sandbox;
+const { pickField, scoreField, normalizeText, adaptDateValue } = sandbox;
 
 const keywords = JSON.parse(
   fs.readFileSync(new URL('../../data/keywords.json', import.meta.url), 'utf8')
@@ -65,6 +65,23 @@ test('kolom yang benar tetap ketemu walau tetangganya punya pola negative', () =
   assert.equal(pathOf({ label: 'Expected Salary' }), 'preferences.desiredSalary');
 });
 
+test('kolom tanggal pendidikan dan kerja tidak saling merebut', () => {
+  assert.equal(pathOf({ label: 'Graduation Year' }), 'education.0.endDate');
+  assert.equal(pathOf({ label: 'Tahun lulus' }), 'education.0.endDate');
+  assert.equal(pathOf({ label: 'To (Actual or Expected)' }), 'education.0.endDate');
+  assert.equal(pathOf({ label: 'Employment Start' }), 'work.0.startDate');
+  assert.equal(pathOf({ label: 'Last Day' }), 'work.0.endDate');
+
+  // Entri tanggal baru tidak boleh merusak yang sudah benar
+  assert.equal(pathOf({ label: 'Start Date' }), 'preferences.availableFrom');
+  assert.equal(pathOf({ label: 'Date of Birth' }), 'personal.dateOfBirth');
+  assert.equal(pathOf({ label: 'Notice Period' }), 'preferences.noticePeriod');
+
+  // "From" / "To" telanjang memang ambigu - kerja dan pendidikan sama-sama
+  // punya, jadi dilewati alih-alih ditebak. Butuh atribut name/id asli.
+  assert.equal(pathOf({ label: 'From' }), null);
+});
+
 test('label ambigu dilewati, bukan ditebak', () => {
   assert.equal(pathOf({ label: 'Name' }), null);
   assert.equal(pathOf({ label: '' }), null);
@@ -99,6 +116,36 @@ test('honeypot anti-bot tidak diisi walau name-nya cocok mutlak', () => {
 
   // Kolom website yang sah tetap ketemu - penahannya tidak kebablasan
   assert.equal(pathOf({ label: 'Personal Website', name: 'website' }), 'links.website');
+});
+
+// Profil menyimpan "YYYY-MM". Mengirimnya apa adanya ke kolom yang cuma muat
+// 4 digit (Workday: placeholder "YYYY", maxlength 4) sama saja dengan gagal.
+test('adaptDateValue: bentuk tanggal mengikuti yang diminta kolom', () => {
+  const at = (props, value = '2018-08') =>
+    adaptDateValue({ label: '', placeholder: '', ariaLabel: '', type: 'text', maxLength: 0, ...props }, value);
+
+  // Workday: kotak 4 digit berlabel From / To (Actual or Expected)
+  assert.equal(at({ placeholder: 'YYYY', maxLength: 4 }), '2018');
+  assert.equal(at({ maxLength: 4 }), '2018');
+  assert.equal(at({ label: 'Graduation Year (YYYY)' }), '2018');
+
+  // Pola gabungan harus menang atas "yyyy" sendirian
+  assert.equal(at({ placeholder: 'MM/YYYY' }), '08/2018');
+  assert.equal(at({ placeholder: 'MM-YYYY' }), '08/2018');
+  assert.equal(at({ placeholder: 'YYYY-MM' }), '2018-08');
+
+  // Kolom tanggal native
+  assert.equal(at({ type: 'month' }), '2018-08');
+  assert.equal(at({ type: 'date' }), '2018-08-01');
+
+  // Tanpa petunjuk, jangan menebak - kirim apa adanya
+  assert.equal(at({}), '2018-08');
+
+  // Nilai yang bukan YYYY-MM tidak boleh disentuh
+  assert.equal(at({ maxLength: 4 }, 'Universitas Contoh'), 'Universitas Contoh');
+  assert.equal(at({ placeholder: 'YYYY' }, '3.74'), '3.74');
+  assert.equal(at({ type: 'date' }, '1999-04-17'), '1999-04-17');
+  assert.equal(at({ placeholder: 'YYYY' }, ''), '');
 });
 
 test('tiap path di kamus mengarah ke section yang ada di skema', async () => {
