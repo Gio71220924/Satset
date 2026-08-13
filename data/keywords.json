@@ -99,6 +99,26 @@
       "negative": ["desired", "applying for", "position applied", "posisi dilamar", "mr", "mrs", "salutation"]
     },
     {
+      "path": "work.0.startDate",
+      "patterns": ["employment start", "date started", "work start", "mulai bekerja", "tanggal mulai kerja"],
+      "negative": ["end", "selesai", "education", "school", "university", "graduation", "birth", "lahir", "available", "notice"]
+    },
+    {
+      "path": "work.0.endDate",
+      "patterns": ["employment end", "date ended", "work end", "last day", "selesai bekerja", "tanggal berakhir kerja"],
+      "negative": ["start", "mulai", "education", "school", "university", "graduation", "birth", "lahir"]
+    },
+    {
+      "path": "education.0.startDate",
+      "patterns": ["year started", "start year", "tahun masuk", "education start", "year of entry"],
+      "negative": ["to", "end", "graduation", "lulus", "employment", "work", "birth", "lahir", "salary", "gaji"]
+    },
+    {
+      "path": "education.0.endDate",
+      "patterns": ["graduation year", "year of graduation", "year graduated", "expected graduation", "tahun lulus", "to actual or expected"],
+      "negative": ["from", "start", "masuk", "employment", "work", "birth", "lahir", "salary", "gaji"]
+    },
+    {
       "path": "education.0.school",
       "patterns": ["school", "university", "college", "institution", "universitas", "sekolah", "perguruan tinggi", "almamater"],
       "negative": ["high school", "sma", "smk", "company", "perusahaan", "major", "jurusan", "degree"]
