@@ -14,7 +14,7 @@ import vm from 'node:vm';
 
 const sandbox = vm.createContext({});
 vm.runInContext(fs.readFileSync(new URL('./score.js', import.meta.url), 'utf8'), sandbox);
-const { pickField, scoreField, normalizeText, adaptDateValue } = sandbox;
+const { pickField, scoreField, normalizeText, adaptDateValue, dateSectionOf } = sandbox;
 
 const keywords = JSON.parse(
   fs.readFileSync(new URL('../../data/keywords.json', import.meta.url), 'utf8')
@@ -146,6 +146,46 @@ test('adaptDateValue: bentuk tanggal mengikuti yang diminta kolom', () => {
   assert.equal(at({ placeholder: 'YYYY' }, '3.74'), '3.74');
   assert.equal(at({ type: 'date' }, '1999-04-17'), '1999-04-17');
   assert.equal(at({ placeholder: 'YYYY' }, ''), '');
+});
+
+// Struktur asli dari halaman Workday. Kolomnya tidak punya <label> sama sekali,
+// jadi satu-satunya petunjuk ada di id dan aria-label.
+test('Workday: id membedakan kerja/pendidikan dan mulai/selesai', () => {
+  const wd = (id, ariaLabel) => field({ id, ariaLabel });
+
+  assert.equal(
+    pickField(wd('workExperience-8--endDate-dateSectionYear-input', 'Year'), keywords)?.path,
+    'work.0.endDate');
+  assert.equal(
+    pickField(wd('workExperience-8--startDate-dateSectionMonth-input', 'Month'), keywords)?.path,
+    'work.0.startDate');
+  assert.equal(
+    pickField(wd('education-1--startDate-dateSectionYear-input', 'Year'), keywords)?.path,
+    'education.0.startDate');
+  assert.equal(
+    pickField(wd('education-1--endDate-dateSectionYear-input', 'Year'), keywords)?.path,
+    'education.0.endDate');
+
+  // Kolom lain di seksi yang sama tidak boleh ikut tertarik ke entri tanggal
+  assert.equal(pathOf({ id: 'education-1--school', label: 'School or University' }),
+    'education.0.school');
+  assert.equal(pathOf({ id: 'workExperience-8--jobTitle', label: 'Job Title' }),
+    'work.0.title');
+});
+
+test('Workday: tanggal terpisah, tiap kotak dapat bagiannya sendiri', () => {
+  const year = field({ id: 'workExperience-8--endDate-dateSectionYear-input', ariaLabel: 'Year' });
+  const month = field({ id: 'workExperience-8--endDate-dateSectionMonth-input', ariaLabel: 'Month' });
+
+  assert.equal(dateSectionOf(year), 'year');
+  assert.equal(dateSectionOf(month), 'month');
+  assert.equal(dateSectionOf(field({ id: 'education-1--school' })), '');
+
+  assert.equal(adaptDateValue(year, '2018-08'), '2018');
+  assert.equal(adaptDateValue(month, '2018-08'), '08');
+
+  // Nilai bukan tanggal tetap tidak disentuh walau kolomnya kotak tanggal
+  assert.equal(adaptDateValue(year, 'Universitas Contoh'), 'Universitas Contoh');
 });
 
 test('tiap path di kamus mengarah ke section yang ada di skema', async () => {

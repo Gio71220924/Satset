@@ -36,6 +36,18 @@ function collectCandidates() {
 }
 
 /**
+ * Kunci klaim untuk aturan "satu path profil hanya untuk satu kolom".
+ *
+ * Pengecualiannya tanggal yang dipecah jadi dua kotak (Workday: MM dan YYYY
+ * terpisah). Keduanya memetakan ke path yang sama, jadi tanpa pembeda ini
+ * kotak pertama mengklaim path-nya dan kotak kedua dibiarkan kosong.
+ */
+function claimKeyFor(path, info) {
+  const section = dateSectionOf(info);
+  return section ? `${path}#${section}` : path;
+}
+
+/**
  * @param {{mappings: object, keywords: object}} data
  * @param {{overwriteFilled?: boolean}} options
  * @returns {{platform: object|null, fields: Array<{el: Element, path: string,
@@ -63,7 +75,7 @@ function scanFields(data, options = {}) {
     if (!el || skip(el)) continue;
 
     claimedEls.add(el);
-    claimedPaths.add(entry.path);
+    claimedPaths.add(claimKeyFor(entry.path, fieldInfoFor(el)));
     fields.push({
       el, path: entry.path, source: 'mapping',
       score: MAPPING_SCORE, label: displayLabel(el),
@@ -74,13 +86,17 @@ function scanFields(data, options = {}) {
   for (const el of collectCandidates()) {
     if (skip(el)) continue;
 
-    const hit = pickField(fieldInfoFor(el), data.keywords);
+    const info = fieldInfoFor(el);
+    const hit = pickField(info, data.keywords);
     // Satu path profil hanya boleh dipakai satu kolom per halaman. Yang duluan
-    // menang, dan lapis 1 selalu duluan.
-    if (!hit || claimedPaths.has(hit.path)) continue;
+    // menang, dan lapis 1 selalu duluan. Kecuali tanggal terpisah - lihat
+    // claimKeyFor().
+    if (!hit) continue;
+    const key = claimKeyFor(hit.path, info);
+    if (claimedPaths.has(key)) continue;
 
     claimedEls.add(el);
-    claimedPaths.add(hit.path);
+    claimedPaths.add(key);
     fields.push({
       el, path: hit.path, source: 'heuristic',
       score: hit.score, label: displayLabel(el),

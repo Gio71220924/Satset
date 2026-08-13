@@ -73,6 +73,21 @@ function scoreField(field, entry) {
  *
  * Nilai yang bukan "YYYY-MM" diteruskan apa adanya.
  */
+/**
+ * Sebagian ATS memecah satu tanggal jadi dua kotak terpisah. Workday:
+ *
+ *   <input aria-label="Month" id="workExperience-8--endDate-dateSectionMonth-input">
+ *   <input aria-label="Year"  id="workExperience-8--endDate-dateSectionYear-input">
+ *
+ * @returns {'month'|'year'|''}
+ */
+function dateSectionOf(field) {
+  const marker = `${field.id} ${field.name} ${field.ariaLabel}`.toLowerCase();
+  if (/datesectionmonth|\bmonth\b/.test(marker)) return 'month';
+  if (/datesectionyear|\byear\b/.test(marker)) return 'year';
+  return '';
+}
+
 function adaptDateValue(field, value) {
   const parts = /^(\d{4})-(\d{2})$/.exec(value);
   if (!parts) return value;
@@ -80,6 +95,11 @@ function adaptDateValue(field, value) {
 
   if (field.type === 'month') return value;
   if (field.type === 'date') return `${value}-01`;   // hari tidak disimpan, ambil tanggal 1
+
+  // Kotak terpisah: masing-masing hanya menerima bagiannya sendiri.
+  const section = dateSectionOf(field);
+  if (section === 'month') return month;
+  if (section === 'year') return year;
 
   const hint = [field.placeholder, field.ariaLabel, field.label]
     .join(' ').toLowerCase();
