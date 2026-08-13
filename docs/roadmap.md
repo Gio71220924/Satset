@@ -44,33 +44,43 @@ Uji: S1–S8 di [test plan §3](test-plan.md#3-storage--profil).
 
 Lever duluan, bukan Greenhouse: form-nya berbasis `name`, paling stabil, dan tidak punya widget upload khusus. Platform pertama sebaiknya yang paling tidak melawan.
 
-- [ ] `src/content/dom.js` — resolusi label, cek kelayakan field, `setNativeValue()`
-- [ ] `src/content/match.js` — lapis 1 (mapping) saja dulu
-- [ ] `src/content/fill.js` — isi, highlight, undo
-- [ ] `src/sw.js` — badge
-- [ ] Popup: daftar field + preview + tombol isi ([ux-flows §2](ux-flows.md#2-popup))
-- [ ] Upload resume lewat `DataTransfer`
+- [x] `src/content/dom.js` — resolusi label, cek kelayakan field, `setNativeValue()`
+- [x] `src/content/match.js` — dua lapis, mapping + heuristik
+- [x] `src/content/fill.js` — isi, highlight, undo
+- [x] `src/sw.js` — badge
+- [x] Popup: daftar field + preview + tombol isi ([ux-flows §2](ux-flows.md#2-popup))
+- [x] Upload resume lewat `DataTransfer`
 - [ ] **Verifikasi selector Lever ke halaman live**, ubah `status` jadi `verified`, catat tanggal di [field-mapping §3](field-mapping.md#3-lever)
 
 Uji: T1–T7 untuk Lever.
 
-**Risiko terbesar ada di minggu ini.** T3.1 (submit tanpa menyentuh field) menentukan apakah `setNativeValue` benar-benar bekerja. Kalau gagal, semua yang setelahnya tidak ada gunanya — kerjakan itu lebih dulu, bukan terakhir.
+**Risiko terbesar ada di milestone ini.** T3.1 (submit tanpa menyentuh field) menentukan apakah `setNativeValue` benar-benar bekerja.
 
-## M3 — Greenhouse + Heuristik (Minggu 3)
+Sebagian sudah dijawab: fixture React controlled input lokal membuktikan `setNativeValue` mengubah state React untuk `<input>` maupun `<textarea>`. Tapi fixture itu tidak memasang value tracker, jadi **belum** membuktikan form ATS sungguhan bereaksi sama. T3.1 di halaman asli tetap wajib.
 
-**Selesai kalau:** Greenhouse terisi, dan domain tanpa mapping terisi sebagian lewat heuristik.
+## M3 — Deteksi Universal (Minggu 3)
 
+**Selesai kalau:** form lamaran di portal mana pun bisa diisi, dan portal ATS populer terdeteksi tanpa diklik.
+
+Awalnya milestone ini bernama "Greenhouse + heuristik". Diubah setelah jelas mesin heuristiknya sudah platform-agnostik sejak awal — yang mengunci cuma daftar domain di manifest. Menambah platform satu per satu berarti mengerjakan ulang hal yang sama belasan kali.
+
+- [x] `score.js` lapis 2: skoring + `negative` + `_neverFill`, terpisah dari DOM
+- [x] `score.test.js` — 8 test lewat `node:vm`, memakai `keywords.json` asli
+- [x] 17 pola vendor ATS di `content_scripts.matches` — deteksi otomatis
+- [x] Injeksi on-demand lewat `activeTab` + `scripting` — situs mana pun, satu klik
+- [x] `optional_host_permissions: ["<all_urls>"]` + toggle di pengaturan, default mati
+- [x] Popup: pembeda `✓` / `~` / `⊘`
+- [x] "Salin laporan kolom"
+- [x] Penahan honeypot anti-bot
 - [ ] Verifikasi selector Greenhouse, tangani dua generasi form
 - [ ] Upload resume Greenhouse (S3) — kalau gagal, tampilkan pesan, jangan dipaksa
-- [ ] `match.js` lapis 2: skoring + `negative` + `_neverFill`
-- [ ] `src/content/match.test.js` — tabel kasus di [test plan §1](test-plan.md#1-otomatis)
-- [ ] Injeksi on-demand lewat `activeTab` + `scripting` untuk domain tak dikenal
-- [ ] Popup: pembeda `✓` / `~` / `⊘`
-- [ ] "Salin laporan field"
+- [ ] Mapping Workday (`data-automation-id`) — kandidat berikutnya, selectornya stabil
 
-Uji: T1–T8 untuk Greenhouse, T5 lengkap di ≥3 domain sembarang.
+Uji: T5 lengkap di ≥3 portal berbeda, termasuk satu yang tidak ada di daftar vendor.
 
-> `match.test.js` ditulis **berbarengan** dengan `match.js`, bukan sesudahnya. Setelah `keywords.json` melewati ~30 entri, menambah pola tanpa jaring pengaman berarti memperbaiki satu field sambil merusak dua lainnya tanpa sadar.
+> `score.test.js` ditulis berbarengan dengan `score.js`, bukan sesudahnya — dan langsung menangkap satu bug: aturan "cocok persis dengan name/id" tidak pernah kena di dunia nyata, karena ATS menamai kolomnya `urls[LinkedIn]` dan `job_application_first_name`.
+
+**Konsekuensi jadi universal:** kualitas `keywords.json` sekarang menentukan seluruh produk, bukan cuma satu platform. Laporan kolom naik dari fitur pinggiran jadi mekanisme inti — tiap kolom yang gagal adalah bahan menambah pola, dan 22 test yang ada adalah jaring pengamannya.
 
 ## M4 — Layak Pakai Sendiri (Minggu 4)
 

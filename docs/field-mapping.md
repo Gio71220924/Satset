@@ -115,12 +115,43 @@ Gejala: field yang sebelumnya terisi jadi kosong terus di satu platform.
 3. Set entri lama jadi `status: "broken"` (jangan dihapus), tambah entri baru
 4. Kalau selector barunya rapuh, pertimbangkan tidak menambal mapping sama sekali dan cukup memperkuat `keywords.json` — heuristik tidak ikut mati saat ATS ganti markup
 
-## 8. Backlog Platform
+## 8. Cakupan Platform
 
-| Platform | Fase | Kesulitan utama |
+Sejak deteksi dibuat universal, "didukung" bukan lagi ya/tidak. Ada tiga tingkat:
+
+| Tingkat | Artinya | Cara kerja |
 |---|---|---|
-| LinkedIn Easy Apply | 2 | Modal multi-step, class ter-obfuscate, DOM ganti tiap langkah. Butuh observer per langkah — pendekatan berbeda, bukan sekadar entri baru di JSON |
-| Workday | 2 | `data-automation-id` justru stabil, tapi form multi-halaman di balik sesi login |
-| Kalibrr | 2 | Prioritas lokal, belum diriset |
-| JobStreet | 2 | Prioritas lokal, belum diriset |
-| Glints | 3 | Belum diriset |
+| **Mapping** | Ada selector khusus di `mappings.json` | Akurasi tertinggi, ditandai `✓` di popup |
+| **Otomatis** | Domainnya ada di `content_scripts.matches` | Heuristik jalan sendiri, badge muncul, ditandai `~` |
+| **Sekali klik** | Situs mana pun di luar dua di atas | User tekan "Pindai halaman ini", heuristik yang sama jalan |
+
+**Tidak ada platform yang "tidak didukung".** Yang berbeda hanya akurasi dan apakah perlu satu klik.
+
+Domain yang terdeteksi otomatis (17 pola di `manifest.json`):
+
+```text
+lever.co             greenhouse.io    myworkdayjobs.com   ashbyhq.com
+smartrecruiters.com  workable.com     icims.com           taleo.net
+bamboohr.com         recruitee.com    teamtailor.com      breezy.hr
+jobvite.com          rippling.com     kalibrr.com         jobstreet.co.id
+glints.com
+```
+
+Yang didaftarkan adalah **vendor ATS, bukan perusahaan**. Mayoritas perusahaan menyewa salah satu vendor di atas alih-alih membuat form sendiri, jadi daftar sependek ini menutup sebagian besar lamaran nyata.
+
+### Yang masih perlu mapping khusus
+
+| Platform | Kenapa mapping-nya berguna | Status |
+|---|---|---|
+| Workday | Punya `data-automation-id` yang stabil — kandidat mapping terbaik berikutnya | heuristik saja |
+| Greenhouse | Mapping ada tapi `unverified`, dan link selalu jadi custom question | perlu verifikasi |
+| Kalibrr, JobStreet, Glints | Label berbahasa Indonesia sudah tertangani `keywords.json` | heuristik saja |
+
+### Yang butuh pendekatan berbeda
+
+| Platform | Kenapa tidak cukup entri JSON |
+|---|---|
+| LinkedIn Easy Apply | Modal multi-step, class ter-obfuscate, DOM ganti tiap langkah. Butuh state machine per langkah |
+| Workday multi-halaman | Lima langkah di balik sesi login. Scan per langkah sudah jalan, tapi tidak ada pelacakan lintas langkah |
+
+Prioritas mapping berikutnya sebaiknya ditentukan dari laporan kolom yang benar-benar gagal, bukan dari tebakan di tabel ini.
