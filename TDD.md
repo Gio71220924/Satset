@@ -72,22 +72,31 @@ Urutan `content/` di manifest: `dom.js`, `match.js`, `fill.js` (bergantung berur
 ```json
 {
   "permissions": ["storage", "activeTab", "scripting"],
-  "host_permissions": [
-    "https://boards.greenhouse.io/*",
-    "https://job-boards.greenhouse.io/*",
-    "https://jobs.lever.co/*"
-  ]
+  "optional_host_permissions": ["<all_urls>"]
 }
 ```
 
-**Tidak pakai `<all_urls>`.** Ini keputusan sadar:
+Tidak ada `host_permissions` wajib. Content script deklaratif hanya butuh `content_scripts.matches`, dan service worker mengambil `data/*.json` dari origin-nya sendiri.
 
-- Domain ATS yang sudah punya mapping → content script auto-inject lewat `content_scripts` (deteksi otomatis jalan, badge muncul sendiri)
-- Domain lain → tidak ada script yang jalan sampai user klik ikon extension. `activeTab` + `chrome.scripting.executeScript` inject on demand
+**Tiga lapis pemicu**, dari yang paling murah izinnya:
 
-Efeknya: heuristik fallback butuh 1 klik, bukan otomatis. Trade-off yang diambil karena `<all_urls>` di extension yang menyimpan data pribadi hampir pasti kena review panjang atau ditolak Chrome Web Store, dan itu risiko rilis yang lebih mahal daripada 1 klik ekstra.
+| Lapis | Cakupan | Izin | Pemicu |
+|---|---|---|---|
+| 1. `content_scripts.matches` | 17 pola domain vendor ATS | terlihat saat install | otomatis, badge muncul sendiri |
+| 2. `activeTab` + `scripting` | **situs mana pun** | nol permanen | user klik ikon → "Pindai halaman ini" |
+| 3. `optional_host_permissions` | semua situs, otomatis | diminta saat dinyalakan | toggle di pengaturan, default mati |
 
-Setiap penambahan platform ke `mappings.json` juga harus menambah entry di `host_permissions` + `content_scripts.matches`.
+Kuncinya di lapis 1: yang didaftarkan adalah **vendor ATS**, bukan perusahaan. Mayoritas perusahaan tidak membuat form sendiri, mereka menyewa Workday/Greenhouse/Lever/dst, jadi 17 pola menutup sebagian besar lamaran nyata tanpa menyentuh `<all_urls>`.
+
+Lapis 2 yang membuat cakupannya tidak berlubang: career page milik perusahaan sendiri, portal lokal, atau ATS yang belum kita kenal tetap bisa diisi — cukup satu klik. Mesin heuristiknya sama persis, tidak ada kode khusus per platform.
+
+Lapis 3 memakai `chrome.scripting.registerContentScripts()` di service worker, karena izin `<all_urls>` saja **tidak** membuat skrip deklaratif jalan di mana-mana. `excludeMatches` diisi daftar vendor dari manifest supaya di domain lapis 1 skrip tidak dimuat dua kali — deklarasi `const` yang sama dijalankan dua kali akan melempar.
+
+`<all_urls>` sengaja opsional, bukan wajib: extension penyimpan data pribadi yang meminta akses semua situs sejak install hampir pasti kena review panjang. Sebagai izin opsional, keputusannya ada di user dan reviewer memperlakukannya jauh lebih longgar.
+
+**`web_accessible_resources` sengaja tidak dipakai.** Berkas yang web-accessible bisa di-`fetch` situs mana pun untuk mendeteksi extension yang terpasang. Untuk alat pencari kerja itu kebocoran nyata — situs karier bisa mengetahui pelamarnya memakai autofill. Karena itu content script meminta data mapping ke service worker lewat pesan, bukan mengambil sendiri.
+
+Menambah platform ke `mappings.json` juga harus menambah pola di `content_scripts.matches` supaya deteksinya otomatis. Kalau tidak ditambahkan, platform itu tetap bisa diisi lewat lapis 2.
 
 ## 5. Komunikasi Antar Komponen
 

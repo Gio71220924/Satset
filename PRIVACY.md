@@ -73,9 +73,31 @@ Kalau Anda memakai komputer bersama atau perangkat kerja yang dikelola pihak lai
 | `storage` | Menyimpan profil Anda di browser |
 | `activeTab` | Membaca form **hanya di tab yang sedang aktif, dan hanya saat Anda mengklik ikon Satset** |
 | `scripting` | Menjalankan kode pendeteksi form di tab tersebut setelah Anda mengklik |
-| Akses ke `boards.greenhouse.io`, `job-boards.greenhouse.io`, `jobs.lever.co` | Mendeteksi form otomatis di situs lamaran yang sudah didukung |
+| Akses ke daftar penyedia ATS | Mendeteksi form otomatis di portal lamaran yang umum dipakai |
 
-Satset **tidak** meminta izin ke seluruh situs. Di luar domain yang terdaftar di atas, tidak ada kode Satset yang berjalan sampai Anda mengklik ikonnya.
+Daftar penyedia ATS yang diakses otomatis:
+
+```text
+lever.co             greenhouse.io    myworkdayjobs.com   ashbyhq.com
+smartrecruiters.com  workable.com     icims.com           taleo.net
+bamboohr.com         recruitee.com    teamtailor.com      breezy.hr
+jobvite.com          rippling.com     kalibrr.com         jobstreet.co.id
+glints.com
+```
+
+Ini adalah perusahaan penyedia sistem rekrutmen, bukan situs perusahaan tempat Anda melamar. Satset hanya membaca kolom form di halaman lamaran; tidak membaca halaman lain, tidak mencatat lowongan yang Anda lihat, dan tidak mengirim apa pun ke mana pun.
+
+**Di luar daftar itu, tidak ada kode Satset yang berjalan sampai Anda mengklik ikonnya.** Saat Anda menekan "Pindai halaman ini", Satset membaca form di tab tersebut saja, sekali itu saja, dan aksesnya berakhir ketika Anda berpindah halaman.
+
+### Izin opsional: deteksi di semua situs
+
+Halaman pengaturan menyediakan pilihan **"Deteksi otomatis di semua situs"**. Pilihan ini **mati secara bawaan** dan hanya aktif kalau Anda menyalakannya sendiri, lalu menyetujui dialog Chrome.
+
+Kalau dinyalakan, Satset memeriksa kolom form di setiap halaman yang Anda buka, supaya portal lamaran yang tidak ada di daftar di atas ikut terdeteksi tanpa perlu diklik.
+
+Yang **tidak** berubah saat dinyalakan: tidak ada data yang dikirim ke mana pun, tidak ada riwayat browsing yang disimpan, dan halaman tetap hanya diperiksa kolom formnya. Apa yang Satset baca tidak pernah meninggalkan perangkat Anda.
+
+Matikan kapan saja lewat halaman pengaturan, atau cabut lewat `chrome://extensions`.
 
 ## 6. Pihak Ketiga
 
