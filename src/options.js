@@ -2,6 +2,7 @@
 // kode per field. Kartu berulang, dokumen, dan ekspor/impor menyusul.
 
 import { STORAGE_KEY, migrate, parseImport, getPath, setPath } from './schema.js';
+import { readLog, clearLog } from './log.js';
 
 const saveState = document.getElementById('saveState');
 
@@ -98,9 +99,10 @@ function onClick(ev) {
   if (!state) return;
 
   switch (ev.target.id) {
-    case 'exportBtn': return exportProfile();
-    case 'importBtn': return document.getElementById('importInput').click();
-    case 'resetBtn':  return void resetAll();
+    case 'exportBtn':   return exportProfile();
+    case 'importBtn':   return document.getElementById('importInput').click();
+    case 'resetBtn':    return void resetAll();
+    case 'clearLogBtn': return void clearHistory();
   }
 
   const add = ev.target.closest('[data-add]');
@@ -189,6 +191,37 @@ async function onDocChange(el) {
   }
 }
 
+/* ---------- riwayat ---------- */
+
+/** Intl bawaan, tanpa pustaka tanggal. */
+const LOG_DATE = new Intl.DateTimeFormat('id-ID', {
+  day: 'numeric', month: 'short', year: 'numeric',
+});
+
+async function renderHistory() {
+  const entries = await readLog();
+  const list = document.getElementById('historyList');
+
+  list.replaceChildren(...entries.map((e) => {
+    const row = document.createElement('div');
+    row.className = 'hrow';
+    for (const [cls, text] of [
+      ['hdate', LOG_DATE.format(new Date(e.at))],
+      ['htitle', e.title || '(tanpa judul)'],
+      ['hhost', e.platform || e.host],
+      ['hcount', `${e.filled} kolom`],
+    ]) {
+      const cell = document.createElement('span');
+      cell.className = cls;
+      cell.textContent = text;
+      row.append(cell);
+    }
+    return row;
+  }));
+
+  document.getElementById('historyEmpty').hidden = entries.length > 0;
+}
+
 /* ---------- ekspor / impor / reset ---------- */
 
 function exportProfile() {
@@ -225,6 +258,12 @@ async function onImport(el) {
   } finally {
     el.value = '';                   // supaya berkas yang sama bisa dipilih lagi
   }
+}
+
+async function clearHistory() {
+  if (!confirm('Hapus seluruh riwayat lamaran? Profil dan dokumen tidak ikut terhapus.')) return;
+  await clearLog();
+  await renderHistory();
 }
 
 async function resetAll() {
@@ -365,6 +404,7 @@ try {
   state = migrate(stored[STORAGE_KEY]);
   renderAll();
   await syncAllSitesToggle();
+  await renderHistory();
 
   // change = sudah blur dan nilainya berubah. Persis auto-save saat blur.
   document.addEventListener('change', onFieldChange);

@@ -81,6 +81,26 @@
 
     .subhead { margin: var(--gap-lg) 0 var(--gap); }
     .mb-lg   { margin-bottom: var(--gap-lg); }
+
+    /* Baris riwayat: tanggal, judul lowongan, asal, jumlah kolom. */
+    .hrow {
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr) 140px 72px;
+      gap: var(--gap);
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .hrow > :not(.htitle) { color: var(--muted); font-size: 12px; }
+    .hrow .htitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hrow .hcount { text-align: right; }
+
+    @media (max-width: 620px) {
+      .hrow { grid-template-columns: 1fr auto; }
+      .hrow .hhost { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -103,6 +123,7 @@
     <a href="#documents">Dokumen</a>
     <a href="#preferences">Preferensi</a>
     <hr>
+    <a href="#history">Riwayat</a>
     <a href="#settings">Pengaturan</a>
   </nav>
 
@@ -298,6 +319,21 @@
           </label>
         </div>
       </div>
+    </section>
+
+    <!-- ---------- Riwayat ---------- -->
+    <section id="history">
+      <div class="section-head row spread">
+        <h2>Riwayat Lamaran</h2>
+        <button type="button" class="danger" id="clearLogBtn">Hapus riwayat</button>
+      </div>
+
+      <div id="historyList"></div>
+      <p class="empty" id="historyEmpty">Belum ada lamaran yang diisi.</p>
+      <p class="hint">
+        Dicatat otomatis tiap kali Satset mengisi kolom. Tanpa status dan tanpa
+        catatan — ini catatan, bukan pelacak lamaran.
+      </p>
     </section>
 
     <!-- ---------- Pengaturan ---------- -->
