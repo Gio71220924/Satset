@@ -3,7 +3,7 @@
 // dan sebagai acuan `path` di data/mappings.json + data/keywords.json.
 // Penjelasan konvensi: docs/profile-schema.md
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 export const STORAGE_KEY = 'satset';
 
 /**
@@ -69,8 +69,31 @@ export function defaultSettings() {
  * @type {Record<number, (data: object) => object>}
  */
 const MIGRATIONS = {
-  // 1: (data) => { ...ubah bentuk...; return data; },   // 1 -> 2
+  // 1 -> 2: satu profil jadi daftar profil. Profil lama dibungkus apa adanya,
+  // nol field hilang - kalau langkah ini salah, profil orang lenyap.
+  1: (data) => {
+    const only = { id: newProfileId(), name: 'Utama', data: data.profile ?? emptyProfile() };
+    return { profiles: [only], activeId: only.id, settings: data.settings };
+  },
 };
+
+/** crypto.randomUUID ada di Chrome dan Node modern. Tanpa pustaka id. */
+const newProfileId = () => crypto.randomUUID();
+
+/** Profil yang sedang dipakai. Selalu mengembalikan sesuatu selama profiles tidak kosong. */
+export function activeProfile(state) {
+  return state.profiles.find((p) => p.id === state.activeId) ?? state.profiles[0];
+}
+
+function freshState() {
+  const only = { id: newProfileId(), name: 'Utama', data: emptyProfile() };
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    profiles: [only],
+    activeId: only.id,
+    settings: defaultSettings(),
+  };
+}
 
 /**
  * @param {object|undefined} stored isi chrome.storage.local[STORAGE_KEY]
@@ -78,13 +101,7 @@ const MIGRATIONS = {
  * @throws {Error} kalau data berasal dari versi extension yang lebih baru
  */
 export function migrate(stored) {
-  if (!stored) {
-    return {
-      schemaVersion: SCHEMA_VERSION,
-      profile: emptyProfile(),
-      settings: defaultSettings(),
-    };
-  }
+  if (!stored) return freshState();
 
   let v = stored.schemaVersion ?? 1;
   if (v > SCHEMA_VERSION) {
@@ -103,9 +120,22 @@ export function migrate(stored) {
     v += 1;
   }
 
+  // Daftar kosong atau rusak diganti profil baru, bukan dibiarkan - halaman
+  // pengaturan tidak boleh menghadapi state tanpa profil sama sekali.
+  const list = Array.isArray(data.profiles) && data.profiles.length
+    ? data.profiles
+    : freshState().profiles;
+
+  const profiles = list.map((p) => ({
+    id: p.id ?? newProfileId(),
+    name: p.name || 'Tanpa nama',
+    data: fillDefaults(emptyProfile(), p.data),
+  }));
+
   return {
     schemaVersion: SCHEMA_VERSION,
-    profile: fillDefaults(emptyProfile(), data.profile),
+    profiles,
+    activeId: profiles.some((p) => p.id === data.activeId) ? data.activeId : profiles[0].id,
     settings: { ...defaultSettings(), ...data.settings },
   };
 }
@@ -142,8 +172,12 @@ function fillDefaults(defaults, stored) {
 export function parseImport(text) {
   const parsed = JSON.parse(text);
 
+  // Terima dua bentuk: ekspor v1 (satu `profile`) dan v2 (daftar `profiles`).
+  // Yang v1 diangkat oleh MIGRATIONS, jadi berkas lama tetap bisa diimpor.
   const isPlainObject = (v) => v != null && typeof v === 'object' && !Array.isArray(v);
-  if (!isPlainObject(parsed) || !isPlainObject(parsed.profile)) {
+  const looksLikeExport = isPlainObject(parsed)
+    && (isPlainObject(parsed.profile) || Array.isArray(parsed.profiles));
+  if (!looksLikeExport) {
     throw new Error('Berkas ini bukan hasil ekspor Satset.');
   }
 
