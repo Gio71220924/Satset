@@ -5,6 +5,7 @@
 // cocok di halaman itu (TDD.md bagian 5).
 
 import { STORAGE_KEY, migrate, getPath } from './schema.js';
+import { appendLog } from './log.js';
 
 const body = document.getElementById('body');
 document.getElementById('version').textContent =
@@ -15,6 +16,8 @@ const MARK = { mapping: '✓', heuristic: '~', skip: '⊘' };
 let state = null;
 let tabId = null;
 let hostname = '';
+let pageTitle = '';
+let platformLabel = '';
 
 /* ---------- util ---------- */
 
@@ -160,8 +163,24 @@ async function doFill(fields) {
 
   const result = await send({ type: 'fill', payload: { values, documents } });
 
-  if (result) renderResult(result);
-  else renderMessage('Halaman berubah. Buka ulang popup untuk scan lagi.', false);
+  if (!result) {
+    renderMessage('Halaman berubah. Buka ulang popup untuk scan lagi.', false);
+    return;
+  }
+
+  if (result.filled > 0) {
+    // Riwayat gagal ditulis tidak boleh menggagalkan pengisian yang sudah jalan.
+    appendLog({
+      at: new Date().toISOString(),
+      host: hostname,
+      platform: platformLabel,
+      title: pageTitle,
+      filled: result.filled,
+      profile: 'Utama',
+    }).catch(() => {});
+  }
+
+  renderResult(result);
 }
 
 async function doUndo() {
@@ -236,6 +255,7 @@ async function start() {
     return;
   }
 
+  platformLabel = scan.platform?.label ?? '';
   renderScan(scan);
 }
 
@@ -243,6 +263,7 @@ try {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   tabId = tab.id;
   hostname = tab.url ? new URL(tab.url).hostname : '';
+  pageTitle = tab.title ?? '';   // judul lowongan, tanpa perlu menyentuh halaman
 
   const stored = await chrome.storage.local.get(STORAGE_KEY);
   state = migrate(stored[STORAGE_KEY]);
