@@ -6,7 +6,6 @@ import { STORAGE_KEY, migrate, parseImport, getPath, setPath } from './schema.js
 const saveState = document.getElementById('saveState');
 
 let state = null;       // { schemaVersion, profile, settings }
-let saveTimer = null;
 
 /* ---------- baca/tulis satu elemen ---------- */
 
@@ -265,11 +264,16 @@ async function flush() {
   }
 }
 
-/** Auto-save, tanpa tombol Simpan. Debounce supaya mengetik cepat tidak menulis tiap huruf. */
+/**
+ * Auto-save, tanpa tombol Simpan.
+ *
+ * Tanpa debounce: listener-nya event `change`, yang hanya fire saat blur dan
+ * nilainya benar-benar berubah - bukan tiap ketikan. Tidak ada rentetan yang
+ * perlu diredam, dan status "Tersimpan" jadi muncul seketika.
+ */
 function scheduleSave() {
   setStatus('Menyimpan…');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(flush, 250);
+  flush();
 }
 
 function setStatus(text, isError = false) {
