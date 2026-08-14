@@ -106,8 +106,6 @@ export function emptyProfile() {
 export function defaultSettings() {
   return {
     overwriteFilled: false,  // true = field yang sudah ada isinya ikut ditimpa
-    autoDetect: true,        // set badge saat form terdeteksi
-    highlightColor: '#22c55e',
   };
 }
 

@@ -86,7 +86,6 @@ test('parseImport: berkas ekspor yang sah diterima utuh', () => {
   assert.equal(profile.personal.nationality, '');   // key baru ditambal default
   assert.equal(profile.work[0].startDate, '2023-08');
   assert.equal(settings.overwriteFilled, true);
-  assert.equal(settings.autoDetect, true);          // setting yang hilang ikut ditambal
 });
 
 test('parseImport: bentuk yang bukan ekspor Satset ditolak, bukan jadi profil kosong', () => {
