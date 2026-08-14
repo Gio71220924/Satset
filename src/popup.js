@@ -144,14 +144,21 @@ function renderMessage(text, withOptions = true) {
 
 async function doFill(fields) {
   const values = {};
+  const documents = {};
+
   for (const f of fields) {
-    if (!f.path.startsWith('documents.')) values[f.path] = getPath(state.profile, f.path);
+    if (f.path.startsWith('documents.')) {
+      // Hanya jenis yang benar-benar cocok di halaman ini. Mengirim keduanya
+      // tiap kali berarti melempar resume base64 (bisa 2 MB) ke halaman ATS
+      // walau tidak ada satu pun kolom unggah di sana.
+      const kind = f.path.split('.')[1];
+      documents[kind] = state.profile.documents[kind];
+    } else {
+      values[f.path] = getPath(state.profile, f.path);
+    }
   }
 
-  const result = await send({
-    type: 'fill',
-    payload: { values, documents: state.profile.documents },
-  });
+  const result = await send({ type: 'fill', payload: { values, documents } });
 
   if (result) renderResult(result);
   else renderMessage('Halaman berubah. Buka ulang popup untuk scan lagi.', false);
