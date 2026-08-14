@@ -82,10 +82,12 @@ lever.co             greenhouse.io    myworkdayjobs.com   ashbyhq.com
 smartrecruiters.com  workable.com     icims.com           taleo.net
 bamboohr.com         recruitee.com    teamtailor.com      breezy.hr
 jobvite.com          rippling.com     kalibrr.com         jobstreet.co.id
-glints.com
+glints.com           docs.google.com/forms
 ```
 
-Ini adalah perusahaan penyedia sistem rekrutmen, bukan situs perusahaan tempat Anda melamar. Satset hanya membaca kolom form di halaman lamaran; tidak membaca halaman lain, tidak mencatat lowongan yang Anda lihat, dan tidak mengirim apa pun ke mana pun.
+Khusus Google, aksesnya dibatasi pada alamat yang diawali `docs.google.com/forms` — banyak perusahaan memakai Google Forms sebagai form lamaran. **Google Docs, Sheets, Slides, dan Drive Anda tidak tersentuh**, meskipun berada di domain yang sama.
+
+Selebihnya adalah perusahaan penyedia sistem rekrutmen, bukan situs perusahaan tempat Anda melamar. Satset hanya membaca kolom form di halaman lamaran; tidak membaca halaman lain, tidak mencatat lowongan yang Anda lihat, dan tidak mengirim apa pun ke mana pun.
 
 **Di luar daftar itu, tidak ada kode Satset yang berjalan sampai Anda mengklik ikonnya.** Saat Anda menekan "Pindai halaman ini", Satset membaca form di tab tersebut saja, sekali itu saja, dan aksesnya berakhir ketika Anda berpindah halaman.
 

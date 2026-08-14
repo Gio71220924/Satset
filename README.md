@@ -29,9 +29,9 @@ Tidak ada portal yang "tidak didukung". Yang berbeda hanya akurasi dan apakah pe
 | **Otomatis** | 17 vendor ATS | Heuristik jalan sendiri, badge muncul, ditandai `~` |
 | **Sekali klik** | Situs mana pun | Popup → "Pindai halaman ini" |
 
-Vendor yang terdeteksi otomatis: Workday, Lever, Greenhouse, Ashby, SmartRecruiters, Workable, iCIMS, Taleo, BambooHR, Recruitee, Teamtailor, Breezy, Jobvite, Rippling, Kalibrr, JobStreet, Glints.
+Vendor yang terdeteksi otomatis: Workday, Lever, Greenhouse, Ashby, SmartRecruiters, Workable, iCIMS, Taleo, BambooHR, Recruitee, Teamtailor, Breezy, Jobvite, Rippling, Kalibrr, JobStreet, Glints, dan **Google Forms**.
 
-Yang didaftarkan adalah **vendor ATS, bukan perusahaan** — mayoritas perusahaan menyewa salah satu vendor di atas alih-alih membuat form sendiri.
+Yang didaftarkan adalah **vendor ATS, bukan perusahaan** — mayoritas perusahaan menyewa salah satu vendor di atas alih-alih membuat form sendiri. Google Forms masuk karena banyak dipakai perusahaan lokal; aksesnya dibatasi pada alamat berawalan `docs.google.com/forms`, jadi Docs, Sheets, dan Drive tidak tersentuh.
 
 Opsional: toggle **"Deteksi otomatis di semua situs"** di pengaturan (default mati) meminta izin `<all_urls>` supaya portal apa pun terdeteksi tanpa diklik.
 
