@@ -7,95 +7,49 @@ export const SCHEMA_VERSION = 1;
 export const STORAGE_KEY = 'satset';
 
 /**
- * @typedef {Object} Personal
- * @property {string} firstName
- * @property {string} lastName
- * @property {string} fullName      Disimpan terpisah, bukan turunan. Sebagian orang
- *                                  punya satu nama, sebagian punya nama tengah.
- * @property {string} email
- * @property {string} phone         Format E.164, mis. "+6281234567890"
- * @property {string} dateOfBirth   "YYYY-MM-DD" atau ""
- * @property {string} addressLine
- * @property {string} city
- * @property {string} province
- * @property {string} postalCode
- * @property {string} country       Nama negara dalam bahasa Inggris, mis. "Indonesia"
- * @property {string} nationality
+ * Profil kosong yang valid. Fungsi ini yang mendefinisikan bentuknya - kalau
+ * dokumen dan kode berbeda, kode yang benar. Konvensi lengkap dan alasannya:
+ * docs/profile-schema.md
+ *
+ * Semua teks default "" (bukan null) supaya options page bisa bind langsung
+ * ke <input> tanpa cek null di tiap kolom. `null` hanya dipakai di dua tempat
+ * yang artinya memang beda: endDate dan documents.
+ *
+ * @returns {object}
  */
-
-/**
- * @typedef {Object} Links
- * @property {string} linkedin
- * @property {string} github
- * @property {string} portfolio
- * @property {string} website
- * URL lengkap dengan skema ("https://..."). ATS sering memvalidasi format URL.
- */
-
-/**
- * @typedef {Object} WorkItem
- * @property {string}      company
- * @property {string}      title
- * @property {string}      location
- * @property {string}      startDate   "YYYY-MM"
- * @property {string|null} endDate     "YYYY-MM", null = masih berjalan
- * @property {boolean}     current     Redundan dengan endDate===null, tapi ATS
- *                                     punya checkbox "I currently work here"
- * @property {string}      description
- */
-
-/**
- * @typedef {Object} EducationItem
- * @property {string}      school
- * @property {string}      degree        mis. "S1", "Bachelor's Degree"
- * @property {string}      fieldOfStudy
- * @property {string}      location
- * @property {string}      startDate     "YYYY-MM"
- * @property {string|null} endDate       "YYYY-MM", null = masih kuliah
- * @property {string}      gpa           String, bukan number. "3.45" dan "3.450"
- *                                       harus terisi persis seperti ditulis user
- */
-
-/**
- * @typedef {Object} LanguageItem
- * @property {string} name
- * @property {'native'|'fluent'|'professional'|'basic'} proficiency
- */
-
-/**
- * @typedef {Object} StoredFile
- * @property {string} name   Nama file asli, mis. "CV_Gi_2026.pdf"
- * @property {string} mime   mis. "application/pdf"
- * @property {number} size   Byte, sebelum base64
- * @property {string} data   base64 tanpa prefix data-URI
- */
-
-/**
- * @typedef {Object} Preferences
- * @property {string}  desiredSalary       Bebas format, mis. "Rp 12.000.000/bulan"
- * @property {string}  noticePeriod        mis. "1 bulan"
- * @property {string}  availableFrom       "YYYY-MM-DD" atau ""
- * @property {string}  workAuthorization   mis. "WNI"
- * @property {boolean} requiresSponsorship
- * @property {boolean} willingToRelocate
- */
-
-/** @returns {object} profil kosong yang valid */
 export function emptyProfile() {
   return {
     personal: {
-      firstName: '', lastName: '', fullName: '', email: '', phone: '',
-      dateOfBirth: '', addressLine: '', city: '', province: '',
-      postalCode: '', country: '', nationality: '',
+      firstName: '', lastName: '',
+      fullName: '',      // disimpan terpisah, bukan turunan - sebagian orang
+                         // punya satu nama, sebagian punya nama tengah
+      email: '',
+      phone: '',         // E.164, mis. "+6281234567890" - sebagian ATS memvalidasi
+      dateOfBirth: '',   // "YYYY-MM-DD" atau ""
+      addressLine: '', city: '', province: '', postalCode: '',
+      country: '',       // nama negara dalam bahasa Inggris, mis. "Indonesia"
+      nationality: '',
     },
+    // URL lengkap dengan skema ("https://..."), ATS sering memvalidasi formatnya
     links: { linkedin: '', github: '', portfolio: '', website: '' },
-    work: [],        // WorkItem[],      urut terbaru dulu
-    education: [],   // EducationItem[], urut terbaru dulu
+
+    // Urut terbaru dulu - indeks 0 yang dipakai untuk "current company".
+    // {company, title, location, startDate, endDate, current, description}
+    //   startDate/endDate "YYYY-MM"; endDate null = masih berjalan
+    //   current redundan dengan endDate===null, tapi ATS punya checkbox sendiri
+    work: [],
+    // {school, degree, fieldOfStudy, location, startDate, endDate, gpa}
+    //   gpa string, bukan number - "3.450" harus terisi persis seperti ditulis
+    education: [],
     skills: [],      // string[]
-    languages: [],   // LanguageItem[]
-    documents: { resume: null, coverLetter: null },  // StoredFile | null
+    languages: [],   // {name, proficiency: native|fluent|professional|basic}[]
+
+    // StoredFile: {name, mime, size, data} - data base64 tanpa prefix data-URI
+    documents: { resume: null, coverLetter: null },
+
     preferences: {
-      desiredSalary: '', noticePeriod: '', availableFrom: '',
+      desiredSalary: '', noticePeriod: '',
+      availableFrom: '',   // "YYYY-MM-DD" atau ""
       workAuthorization: '', requiresSponsorship: false,
       willingToRelocate: false,
     },
