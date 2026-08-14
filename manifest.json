@@ -32,7 +32,8 @@
         "https://*.rippling.com/*",
         "https://*.kalibrr.com/*",
         "https://*.jobstreet.co.id/*",
-        "https://*.glints.com/*"
+        "https://*.glints.com/*",
+        "https://docs.google.com/forms/*"
       ],
       "js": [
         "src/content/score.js",

@@ -51,10 +51,17 @@ function labelFor(el) {
   const wrapping = el.closest('label');
   if (wrapping) return wrapping.textContent;
 
-  const ariaId = el.getAttribute('aria-labelledby');
-  if (ariaId) {
-    const target = document.getElementById(ariaId);
-    if (target) return target.textContent;
+  // aria-labelledby adalah DAFTAR id, bukan id tunggal. Google Forms memakai
+  // bentuk itu (aria-labelledby="i1 i4") dan tidak punya <label>, name, atau id
+  // bermakna sama sekali - jadi memperlakukannya sebagai id tunggal membuat
+  // seluruh kolomnya tak berlabel dan tak pernah cocok.
+  const labelledBy = el.getAttribute('aria-labelledby');
+  if (labelledBy) {
+    const text = labelledBy.trim().split(/\s+/)
+      .map((id) => document.getElementById(id)?.textContent ?? '')
+      .filter(Boolean)
+      .join(' ');
+    if (text) return text;
   }
 
   // Terakhir: teks tepat sebelum kolom, mis. <div>Email</div><input>
