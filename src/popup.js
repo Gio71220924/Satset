@@ -4,7 +4,7 @@
 // masuk halaman ATS pada detik user menekan "Isi", dan hanya path yang memang
 // cocok di halaman itu (TDD.md bagian 5).
 
-import { STORAGE_KEY, migrate, getPath } from './schema.js';
+import { STORAGE_KEY, migrate, activeProfile, getPath } from './schema.js';
 import { appendLog } from './log.js';
 
 const body = document.getElementById('body');
@@ -49,10 +49,10 @@ const isEmptyProfile = (p) =>
 /** Nilai siap tampil untuk satu path. String kosong berarti belum ada di profil. */
 function valueFor(path) {
   if (path.startsWith('documents.')) {
-    const doc = state.profile.documents[path.split('.')[1]];
+    const doc = activeProfile(state).data.documents[path.split('.')[1]];
     return doc ? doc.name : '';
   }
-  return getPath(state.profile, path);
+  return getPath(activeProfile(state).data, path);
 }
 
 /* ---------- tampilan ---------- */
@@ -155,9 +155,9 @@ async function doFill(fields) {
       // tiap kali berarti melempar resume base64 (bisa 2 MB) ke halaman ATS
       // walau tidak ada satu pun kolom unggah di sana.
       const kind = f.path.split('.')[1];
-      documents[kind] = state.profile.documents[kind];
+      documents[kind] = activeProfile(state).data.documents[kind];
     } else {
-      values[f.path] = getPath(state.profile, f.path);
+      values[f.path] = getPath(activeProfile(state).data, f.path);
     }
   }
 
@@ -176,7 +176,7 @@ async function doFill(fields) {
       platform: platformLabel,
       title: pageTitle,
       filled: result.filled,
-      profile: 'Utama',
+      profile: activeProfile(state).name,
     }).catch(() => {});
   }
 
@@ -268,7 +268,7 @@ try {
   const stored = await chrome.storage.local.get(STORAGE_KEY);
   state = migrate(stored[STORAGE_KEY]);
 
-  if (isEmptyProfile(state.profile)) {
+  if (isEmptyProfile(activeProfile(state).data)) {
     render([
       el('p', { className: 'small muted', textContent:
         'Profil masih kosong. Isi sekali, lalu bisa dipakai di semua form lamaran.' }),

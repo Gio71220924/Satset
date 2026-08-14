@@ -1,12 +1,17 @@
 // Editor profil. Binding generik: tiap input membawa data-path, tidak ada
 // kode per field. Kartu berulang, dokumen, dan ekspor/impor menyusul.
 
-import { STORAGE_KEY, migrate, parseImport, getPath, setPath } from './schema.js';
+import {
+  STORAGE_KEY, migrate, activeProfile, emptyProfile, parseImport, getPath, setPath,
+} from './schema.js';
 import { readLog, clearLog } from './log.js';
 
 const saveState = document.getElementById('saveState');
 
-let state = null;       // { schemaVersion, profile, settings }
+let state = null;   // { schemaVersion, profiles: [{id, name, data}], activeId, settings }
+
+/** Isi profil yang sedang dibuka. Bentuknya sama persis dengan skema v1. */
+const P = () => activeProfile(state).data;
 
 /* ---------- baca/tulis satu elemen ---------- */
 
@@ -58,7 +63,7 @@ function buildCard(name, item) {
 }
 
 function renderList(name) {
-  const items = state.profile[name];
+  const items = P()[name];
   document.getElementById(name + 'List')
     .replaceChildren(...items.map((item) => buildCard(name, item)));
   document.getElementById(name + 'Empty').hidden = items.length > 0;
@@ -103,12 +108,16 @@ function onClick(ev) {
     case 'importBtn':   return document.getElementById('importInput').click();
     case 'resetBtn':    return void resetAll();
     case 'clearLogBtn': return void clearHistory();
+    case 'newProfileBtn':    return newProfile();
+    case 'renameProfileBtn': return renameProfile();
+    case 'dupProfileBtn':    return duplicateProfile();
+    case 'delProfileBtn':    return deleteProfile();
   }
 
   const add = ev.target.closest('[data-add]');
   if (add) {
     const name = add.dataset.add;
-    state.profile[name].push(BLANK[name]());
+    P()[name].push(BLANK[name]());
     renderList(name);
     scheduleSave();
     return;
@@ -119,8 +128,8 @@ function onClick(ev) {
     const card = remove.closest('[data-item]');
     const name = listNameOf(card);
     card.remove();
-    state.profile[name] = readList(name);
-    document.getElementById(name + 'Empty').hidden = state.profile[name].length > 0;
+    P()[name] = readList(name);
+    document.getElementById(name + 'Empty').hidden = P()[name].length > 0;
     scheduleSave();
     return;
   }
@@ -128,7 +137,7 @@ function onClick(ev) {
   const clear = ev.target.closest('[data-clear-doc]');
   if (clear) {
     const kind = clear.dataset.clearDoc;
-    state.profile.documents[kind] = null;
+    P().documents[kind] = null;
     document.getElementById(kind + 'Input').value = '';
     renderDoc(kind);
     scheduleSave();
@@ -152,7 +161,7 @@ function setDocMeta(kind, text, isError = false) {
 }
 
 function renderDoc(kind) {
-  const doc = state.profile.documents[kind];
+  const doc = P().documents[kind];
   setDocMeta(kind, doc ? `${doc.name} · ${formatSize(doc.size)}` : 'Belum ada');
 }
 
@@ -178,7 +187,7 @@ async function onDocChange(el) {
   }
 
   try {
-    state.profile.documents[kind] = {
+    P().documents[kind] = {
       name: file.name,
       mime: file.type || 'application/octet-stream',
       size: file.size,
@@ -189,6 +198,62 @@ async function onDocChange(el) {
   } catch (err) {
     setDocMeta(kind, err.message, true);
   }
+}
+
+/* ---------- profil ---------- */
+
+function renderProfiles() {
+  const select = document.getElementById('profileSelect');
+  select.replaceChildren(...state.profiles.map((p) =>
+    Object.assign(document.createElement('option'), { value: p.id, textContent: p.name })));
+  select.value = state.activeId;
+  document.getElementById('delProfileBtn').disabled = state.profiles.length < 2;
+}
+
+/** Ganti profil aktif lalu gambar ulang seluruh form. */
+function switchProfile(id) {
+  state.activeId = id;
+  renderAll();
+  scheduleSave();
+}
+
+function newProfile() {
+  const name = prompt('Nama profil baru:', 'Profil baru')?.trim();
+  if (!name) return;
+  state.profiles.push({ id: crypto.randomUUID(), name, data: emptyProfile() });
+  switchProfile(state.profiles.at(-1).id);
+  renderProfiles();
+}
+
+function renameProfile() {
+  const current = activeProfile(state);
+  const name = prompt('Nama profil:', current.name)?.trim();
+  if (!name) return;
+  current.name = name;
+  renderProfiles();
+  scheduleSave();
+}
+
+function duplicateProfile() {
+  const current = activeProfile(state);
+  const name = prompt('Nama salinan:', `${current.name} (salinan)`)?.trim();
+  if (!name) return;
+
+  // structuredClone supaya resume base64 ikut tersalin, bukan berbagi referensi -
+  // kalau berbagi, mengganti CV di satu profil diam-diam mengubah profil lain.
+  state.profiles.push({ id: crypto.randomUUID(), name, data: structuredClone(current.data) });
+  switchProfile(state.profiles.at(-1).id);
+  renderProfiles();
+}
+
+function deleteProfile() {
+  if (state.profiles.length < 2) return;   // halaman tidak boleh tanpa profil
+  const current = activeProfile(state);
+  if (!confirm(`Hapus profil "${current.name}" beserta dokumennya? Tidak bisa dibatalkan.`)) return;
+
+  state.profiles = state.profiles.filter((p) => p.id !== current.id);
+  switchProfile(state.profiles[0].id);
+  renderProfiles();
 }
 
 /* ---------- riwayat ---------- */
@@ -282,7 +347,7 @@ async function resetAll() {
 function writeForm() {
   for (const el of document.querySelectorAll('[data-path]')) {
     // getPath sudah mengurus null, array, dan boolean jadi teks.
-    const raw = getPath(state.profile, el.dataset.path);
+    const raw = getPath(P(), el.dataset.path);
     writeValue(el, el.type === 'checkbox' ? raw === 'Yes' : raw);
   }
   for (const el of document.querySelectorAll('[data-setting]')) {
@@ -294,7 +359,7 @@ function writeForm() {
 
 async function flush() {
   try {
-    state.profile.updatedAt = new Date().toISOString();
+    P().updatedAt = new Date().toISOString();
     await chrome.storage.local.set({ [STORAGE_KEY]: state });
     setStatus('Tersimpan');
   } catch (err) {
@@ -351,6 +416,11 @@ function onFieldChange(ev) {
   const el = ev.target;
   if (!state) return;
 
+  if (el.id === 'profileSelect') {
+    switchProfile(el.value);
+    return;
+  }
+
   if (el.id === 'allSitesToggle') {
     onAllSitesToggle(el);
     return;
@@ -370,10 +440,10 @@ function onFieldChange(ev) {
   if (card) {
     const name = listNameOf(card);
     syncCard(card);
-    state.profile[name] = readList(name);
+    P()[name] = readList(name);
     scheduleSave();
   } else if (el.dataset.path) {
-    setPath(state.profile, el.dataset.path, readValue(el));
+    setPath(P(), el.dataset.path, readValue(el));
     scheduleSave();
   } else if (el.dataset.setting) {
     state.settings[el.dataset.setting] = readValue(el);
@@ -402,6 +472,7 @@ function lockForm(message) {
 try {
   const stored = await chrome.storage.local.get(STORAGE_KEY);
   state = migrate(stored[STORAGE_KEY]);
+  renderProfiles();
   renderAll();
   await syncAllSitesToggle();
   await renderHistory();
@@ -409,7 +480,7 @@ try {
   // change = sudah blur dan nilainya berubah. Persis auto-save saat blur.
   document.addEventListener('change', onFieldChange);
   document.addEventListener('click', onClick);
-  setStatus(state.profile.updatedAt ? 'Tersimpan' : 'Belum ada data');
+  setStatus(P().updatedAt ? 'Tersimpan' : 'Belum ada data');
 } catch (err) {
   // Data dari extension versi lebih baru. Read-only, jangan sampai tertimpa.
   setStatus('Tidak bisa dibuka', true);

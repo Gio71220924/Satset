@@ -79,6 +79,8 @@
 
     .pair { display: flex; gap: var(--gap); flex-wrap: wrap; }
 
+    #profileSelect { max-width: 220px; }
+
     .subhead { margin: var(--gap-lg) 0 var(--gap); }
     .mb-lg   { margin-bottom: var(--gap-lg); }
 
@@ -107,7 +109,10 @@
 
 <header class="topbar">
   <div class="inner row spread">
-    <h1>Satset — Profil</h1>
+    <div class="row">
+      <h1>Satset</h1>
+      <select id="profileSelect" aria-label="Profil aktif"></select>
+    </div>
     <span class="small muted" id="saveState">Belum tersambung</span>
   </div>
 </header>
@@ -363,6 +368,19 @@
           Biarkan mati kalau ragu. Sebagian ATS mengisi sendiri email dari akun yang login.
         </p>
       </div>
+
+      <div class="section-head"><strong class="small">Profil</strong></div>
+      <div class="pair">
+        <button type="button" id="newProfileBtn">+ Profil baru</button>
+        <button type="button" id="renameProfileBtn">Ganti nama</button>
+        <button type="button" id="dupProfileBtn">Duplikat</button>
+        <button type="button" class="danger" id="delProfileBtn">Hapus profil ini</button>
+      </div>
+      <p class="hint mb-lg">
+        Beberapa profil berguna kalau kamu melamar untuk peran yang berbeda —
+        misal satu untuk Data Analyst, satu untuk ML Engineer. Pilih yang aktif
+        di kanan atas; itu yang dipakai saat mengisi form.
+      </p>
 
       <div class="section-head"><strong class="small">Data</strong></div>
       <div class="pair">
