@@ -58,6 +58,8 @@ Setelah mengubah kode: klik **⟳** di kartu extension. Jangan *remove lalu load
 | Kerja yang masih jalan | Centang "Masih bekerja di sini" |
 | Upload CV | Section Dokumen, maks 2 MB |
 | Backup / pindah perangkat | **Ekspor profil** → `.json`, lalu **Impor profil** |
+| Punya beberapa CV | Pengaturan → **+ Profil baru** atau **Duplikat**, lalu pilih yang aktif di kanan atas |
+| Lihat sudah apply ke mana | Section **Riwayat** — dicatat otomatis tiap kali mengisi |
 | Mulai dari nol | **Hapus semua data** |
 
 Kartu pengalaman paling atas dipakai untuk kolom "Current company" dan "Current title".
@@ -157,4 +159,4 @@ Data hanya keluar dari perangkat lewat tindakanmu sendiri: mengisi form (terkiri
 
 **Selector di `mappings.json` masih berstatus `unverified`** — ditulis dari struktur form yang umum, belum diuji ke halaman lamaran live. Heuristik menutup sebagian besar kasus, tapi jangan anggap mapping-nya pasti benar.
 
-Belum ada: parsing CV otomatis, LinkedIn Easy Apply, multi-profil, riwayat lamaran, sinkronisasi lintas perangkat. Semuanya Fase 2+ di [roadmap](docs/roadmap.md).
+Belum ada: parsing CV otomatis, LinkedIn Easy Apply, pengisian dropdown dan radio buatan sendiri, sinkronisasi lintas perangkat. Semuanya Fase 2+ di [roadmap](docs/roadmap.md).

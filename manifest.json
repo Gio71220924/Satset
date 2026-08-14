@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Satset",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Isi form lamaran kerja otomatis dari satu profil tersimpan di browser.",
 
   "permissions": ["storage", "activeTab", "scripting"],

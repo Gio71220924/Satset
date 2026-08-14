@@ -8,21 +8,33 @@ Cek: `node --test` dari root repo.
 
 ## 1. Layout Storage
 
-Satu key saja di `chrome.storage.local`:
+Dua key di `chrome.storage.local`:
 
 ```jsonc
 {
   "satset": {
-    "schemaVersion": 1,
-    "profile":  { /* §2 */ },
+    "schemaVersion": 2,
+    "profiles": [
+      { "id": "…uuid…", "name": "Data Analyst", "data": { /* §2 */ } },
+      { "id": "…uuid…", "name": "ML Engineer",  "data": { /* §2 */ } }
+    ],
+    "activeId": "…uuid…",
     "settings": { /* §5 */ }
-  }
+  },
+
+  "satset_log": [ /* riwayat lamaran, lihat src/log.js */ ]
 }
 ```
 
-Satu key, bukan satu key per section. Alasan: `storage.local.get('satset')` sekali, tulis sekali, tidak ada state setengah jadi kalau tulis gagal di tengah. Profil ukurannya kecil (<50 KB tanpa dokumen), jadi tidak ada alasan memecahnya.
+`data` di tiap profil bentuknya **persis** seperti `profile` di skema v1 — v2 hanya membungkusnya. Itu sengaja: `getPath`, `setPath`, dan `fillDefaults` tidak perlu berubah sama sekali, dan migrasi 1→2 cukup membungkus tanpa menyentuh isinya.
 
-Pengecualian yang mungkin muncul nanti: kalau `documents` (resume base64, ratusan KB) membuat tiap penyimpanan terasa lambat, pindahkan `documents` ke key `satset_docs` terpisah. Belum perlu sekarang.
+Profil ada di satu key, bukan satu key per section: `storage.local.get('satset')` sekali, tulis sekali, tidak ada state setengah jadi kalau tulis gagal di tengah.
+
+Riwayat dipisah ke key sendiri karena alasan sebaliknya — menulis riwayat tiap kali mengisi form tidak boleh ikut menulis ulang resume base64 ratusan KB, dan riwayat harus bisa dihapus tanpa menyentuh profil.
+
+`id` dibuat dengan `crypto.randomUUID()` bawaan. Profil aktif dibaca lewat `activeProfile(state)` di `src/schema.js` — kalau `activeId` menunjuk profil yang sudah dihapus, ia jatuh ke profil pertama, tidak melempar.
+
+Pengecualian yang mungkin muncul nanti: kalau `documents` membuat tiap penyimpanan terasa lambat, pindahkan juga ke key terpisah. Belum perlu.
 
 ## 2. Section Profil
 
