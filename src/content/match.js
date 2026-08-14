@@ -72,9 +72,10 @@ function scanFields(data, options = {}) {
     }
     if (!el || skip(el)) continue;
 
+    const info = fieldInfoFor(el);
     claimedEls.add(el);
-    claimedPaths.add(claimKeyFor(entry.path, fieldInfoFor(el)));
-    fields.push({ el, path: entry.path, source: 'mapping', label: displayLabel(el) });
+    claimedPaths.add(claimKeyFor(entry.path, info));
+    fields.push({ el, path: entry.path, source: 'mapping', label: displayLabel(info) });
   }
 
   // Lapis 2 - heuristik untuk kolom yang belum diklaim.
@@ -92,7 +93,7 @@ function scanFields(data, options = {}) {
 
     claimedEls.add(el);
     claimedPaths.add(key);
-    fields.push({ el, path: hit.path, source: 'heuristic', label: displayLabel(el) });
+    fields.push({ el, path: hit.path, source: 'heuristic', label: displayLabel(info) });
   }
 
   return { platform, fields };

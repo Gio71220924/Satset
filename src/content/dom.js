@@ -92,9 +92,12 @@ function fieldInfoFor(el) {
   };
 }
 
-/** Nama kolom untuk ditampilkan di popup. Dipotong supaya baris tidak melar. */
-function displayLabel(el) {
-  const info = fieldInfoFor(el);
+/**
+ * Nama kolom untuk ditampilkan di popup. Dipotong supaya baris tidak melar.
+ * Menerima hasil fieldInfoFor(), bukan elemen - pemanggil selalu sudah punya,
+ * dan menghitung ulang berarti menelusuri DOM dua kali per kolom.
+ */
+function displayLabel(info) {
   const text = info.label || info.ariaLabel || info.placeholder || info.name || info.id;
   return cleanText(text).slice(0, 60);
 }
