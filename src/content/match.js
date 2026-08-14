@@ -5,8 +5,6 @@
 // path, tanpa nilai. Data pribadi baru masuk halaman saat user menekan tombol
 // isi di popup (TDD.md bagian 5).
 
-const MAPPING_SCORE = 9;   // di atas skor heuristik mana pun, cuma untuk pengurutan
-
 /**
  * Data diminta ke service worker, bukan di-fetch sendiri. Mengambilnya langsung
  * menuntut web_accessible_resources, dan berkas yang web-accessible bisa
@@ -51,7 +49,7 @@ function claimKeyFor(path, info) {
  * @param {{mappings: object, keywords: object}} data
  * @param {{overwriteFilled?: boolean}} options
  * @returns {{platform: object|null, fields: Array<{el: Element, path: string,
- *           source: 'mapping'|'heuristic', score: number, label: string}>}}
+ *           source: 'mapping'|'heuristic', label: string}>}}
  */
 function scanFields(data, options = {}) {
   const { overwriteFilled = false } = options;
@@ -76,10 +74,7 @@ function scanFields(data, options = {}) {
 
     claimedEls.add(el);
     claimedPaths.add(claimKeyFor(entry.path, fieldInfoFor(el)));
-    fields.push({
-      el, path: entry.path, source: 'mapping',
-      score: MAPPING_SCORE, label: displayLabel(el),
-    });
+    fields.push({ el, path: entry.path, source: 'mapping', label: displayLabel(el) });
   }
 
   // Lapis 2 - heuristik untuk kolom yang belum diklaim.
@@ -97,10 +92,7 @@ function scanFields(data, options = {}) {
 
     claimedEls.add(el);
     claimedPaths.add(key);
-    fields.push({
-      el, path: hit.path, source: 'heuristic',
-      score: hit.score, label: displayLabel(el),
-    });
+    fields.push({ el, path: hit.path, source: 'heuristic', label: displayLabel(el) });
   }
 
   return { platform, fields };

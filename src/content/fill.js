@@ -39,7 +39,7 @@ async function runScan(options) {
       ? { id: lastScan.platform.id, label: lastScan.platform.label }
       : null,
     fields: lastScan.fields.map((f, id) => ({
-      id, label: f.label, path: f.path, source: f.source, score: f.score,
+      id, label: f.label, path: f.path, source: f.source,
     })),
   };
 }
